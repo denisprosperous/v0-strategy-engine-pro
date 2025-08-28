@@ -1,0 +1,103 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+
+
+
+        {
+            "name": "Launch SmartTraderAI",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [],
+            "justMyCode": true
+        },
+        {
+            "name": "Test Setup",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_setup.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [],
+            "justMyCode": true
+        },
+        {
+            "name": "Debug with Arguments",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [
+                "--debug",
+                "--log-level=DEBUG"
+            ],
+            "justMyCode": false
+        },
+        {
+            "name": "Test Database",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_database.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [],
+            "justMyCode": true
+        },
+        {
+            "name": "Test Exchanges",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_exchanges.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [],
+            "justMyCode": true
+        },
+        {
+            "name": "Test AI Services",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_ai_services.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [],
+            "justMyCode": true
+        },
+        {
+            "name": "Test Telegram Bot",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/test_telegram_bot.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
+            "args": [],
+            "justMyCode": true
+        }
+    ]
+}

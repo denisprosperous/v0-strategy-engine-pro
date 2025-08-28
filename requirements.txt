@@ -1,0 +1,92 @@
+# Core dependencies
+python-dotenv>=1.0.0
+requests>=2.31.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Database
+sqlalchemy>=2.0.0
+alembic>=1.11.0
+
+# Exchange APIs
+ccxt>=4.0.0
+
+# AI and ML
+openai>=1.0.0
+anthropic>=0.7.0
+google-generativeai>=0.3.0
+textblob>=0.17.0
+vaderSentiment>=3.3.2
+
+# Technical Analysis
+ta-lib>=0.4.0
+pandas-ta>=0.3.14b0
+
+# Telegram Bot
+python-telegram-bot>=20.0
+
+# Cryptography and Security
+cryptography>=41.0.0
+bcrypt>=4.0.0
+
+# Async support
+aiohttp>=3.8.0
+asyncio-mqtt>=0.13.0
+
+# Data visualization
+matplotlib>=3.7.0
+plotly>=5.15.0
+seaborn>=0.12.0
+
+# Web framework (for future dashboard)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# Logging and monitoring
+structlog>=23.1.0
+prometheus-client>=0.17.0
+
+# Date and time
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# JSON and data handling
+pydantic>=2.0.0
+jsonschema>=4.19.0
+
+# HTTP client
+httpx>=0.24.0
+
+# Configuration management
+pyyaml>=6.0.0
+configparser>=5.3.0
+
+# File handling
+pathlib2>=2.3.0
+
+# Math and statistics
+scipy>=1.11.0
+scikit-learn>=1.3.0
+
+# Network utilities
+websockets>=11.0.0
+
+# Development tools
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx-rtd-theme>=1.3.0
+
+# Performance monitoring
+psutil>=5.9.0
+
+# Environment management
+python-decouple>=3.8.0
