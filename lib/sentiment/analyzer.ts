@@ -2,6 +2,7 @@
 import { supabaseServer } from "@/lib/config/supabase-server"
 import { config } from "@/lib/config/environment"
 import { logger } from "@/lib/utils/logger"
+import { redis } from "@/lib/config/redis"
 
 export interface SentimentScore {
   symbol: string
@@ -62,9 +63,20 @@ export class SentimentAnalyzer {
       return cached
     }
 
+    if (redis) {
+      const rKey = `sentiment:${symbol}`
+      const rVal = await redis.get<any>(rKey)
+      if (rVal && typeof rVal === "object" && typeof rVal.score === "number") {
+        return { ...rVal, timestamp: new Date(rVal.timestamp) }
+      }
+    }
+
     // Fetch fresh sentiment data
     const sentiment = await this.analyzeSentiment(symbol)
     this.sentimentCache.set(symbol, sentiment)
+    if (redis) {
+      await redis.set(`sentiment:${symbol}`, sentiment, { ex: 300 })
+    }
 
     return sentiment
   }
