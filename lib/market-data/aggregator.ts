@@ -1,5 +1,5 @@
 // Market data aggregation service for multiple exchanges
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
 
 export interface PriceData {
@@ -99,7 +99,7 @@ export class MarketDataAggregator {
   async getHistoricalData(symbol: string, timeframe: string, limit = 100): Promise<CandleData[]> {
     try {
       // First try to get from database
-      const { data: dbData, error } = await supabase
+      const { data: dbData, error } = await supabaseServer
         .from("market_data")
         .select("*")
         .eq("symbol", symbol)
@@ -253,7 +253,7 @@ export class MarketDataAggregator {
 
   private async storeMarketData(candle: CandleData): Promise<void> {
     try {
-      await supabase.from("market_data").upsert({
+      await supabaseServer.from("market_data").upsert({
         symbol: candle.symbol,
         timestamp: candle.timestamp.toISOString(),
         open: candle.open,

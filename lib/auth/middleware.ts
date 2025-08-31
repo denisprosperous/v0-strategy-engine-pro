@@ -11,7 +11,13 @@ export function withAuth(handler: (req: AuthenticatedRequest) => Promise<NextRes
   return async (req: AuthenticatedRequest): Promise<NextResponse> => {
     try {
       const authHeader = req.headers.get("authorization")
-      const token = extractTokenFromHeader(authHeader)
+      let token = extractTokenFromHeader(authHeader)
+
+      // Fallback to cookie when header is absent
+      if (!token) {
+        const cookieToken = req.cookies.get("auth-token")?.value
+        if (cookieToken) token = cookieToken
+      }
 
       if (!token) {
         return NextResponse.json({ error: "Authentication required" }, { status: 401 })

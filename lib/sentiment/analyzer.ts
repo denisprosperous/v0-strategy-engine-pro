@@ -1,5 +1,5 @@
 // Sentiment analysis service for social media and news
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { config } from "@/lib/config/environment"
 import { logger } from "@/lib/utils/logger"
 
@@ -367,7 +367,7 @@ export class SentimentAnalyzer {
 
   private async storeSentimentData(sentiment: SentimentScore): Promise<void> {
     try {
-      await supabase.from("sentiment_data").insert({
+      await supabaseServer.from("sentiment_data").insert({
         symbol: sentiment.symbol,
         timestamp: sentiment.timestamp.toISOString(),
         source: sentiment.sources.join(","),
