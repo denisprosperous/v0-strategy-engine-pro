@@ -1,7 +1,7 @@
 // Core trading engine that orchestrates strategy execution and order management
 import type { BaseBroker } from "../brokers/base-broker"
 import type { BaseStrategy } from "../strategies/base-strategy"
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
 import type { MarketData, Trade, TradeSignal } from "@/lib/database/schema"
 
@@ -151,14 +151,14 @@ export class TradingEngine {
       }
 
       // Save to database
-      await supabase.from("trades").insert(trade)
+      await supabaseServer.from("trades").insert(trade)
 
       // Add to active trades
       this.activeTrades.set(trade.id, trade)
       this.lastTradeTime = Date.now()
 
       // Mark signal as executed
-      await supabase.from("trade_signals").update({ executed: true }).eq("id", signal.id)
+      await supabaseServer.from("trade_signals").update({ executed: true }).eq("id", signal.id)
 
       logger.info("Trade executed successfully", { trade, signal })
 
@@ -180,7 +180,7 @@ export class TradingEngine {
 
   private async loadActiveTrades(): Promise<void> {
     try {
-      const { data: trades, error } = await supabase.from("trades").select("*").eq("status", "open")
+      const { data: trades, error } = await supabaseServer.from("trades").select("*").eq("status", "open")
 
       if (error) throw error
 
@@ -263,7 +263,7 @@ export class TradingEngine {
       this.dailyPnL += pnl
 
       // Update trade in database
-      await supabase
+      await supabaseServer
         .from("trades")
         .update({
           status: "closed",
