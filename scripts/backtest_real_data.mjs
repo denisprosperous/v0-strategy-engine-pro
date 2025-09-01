@@ -93,13 +93,18 @@ function simulateMeanRev(data, ind) {
 }
 
 async function main(){
-  const symbol='BTCUSDT', interval='1h'
+  const symbols=['BTCUSDT','ETHUSDT','SOLUSDT','AVAXUSDT']
+  const interval='1h'
   const end=Date.now(); const start=end-1000*60*60*24*60 // ~60 days
-  const data = await fetchKlines(symbol, interval, start, end)
-  const ind = indicators(data)
-  const bo = simulateBreakout(data, ind)
-  const mr = simulateMeanRev(data, ind)
-  console.log({ symbol, days:60, breakout: bo, meanReversion: mr })
+  const rows=[]
+  for (const symbol of symbols){
+    const data = await fetchKlines(symbol, interval, start, end)
+    const ind = indicators(data)
+    const bo = simulateBreakout(data, ind)
+    const mr = simulateMeanRev(data, ind)
+    rows.push({ symbol, trades_bo: bo.trades, win_bo: +(bo.winRate*100).toFixed(1), pnl_bo: +bo.pnl.toFixed(2), trades_mr: mr.trades, win_mr: +(mr.winRate*100).toFixed(1), pnl_mr: +mr.pnl.toFixed(2) })
+  }
+  console.table(rows)
 }
 
 main().catch(e=>{console.error(e); process.exit(1)})

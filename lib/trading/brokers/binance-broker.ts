@@ -1,5 +1,5 @@
 // Binance broker implementation
-import { BaseBroker, type OrderRequest, type OrderResponse, type PositionInfo, type BalanceInfo } from "./base-broker"
+import { BaseBroker, type OrderRequest, type OrderResponse, type PositionInfo, type BalanceInfo, type SymbolFilters } from "./base-broker"
 import { logger } from "@/lib/utils/logger"
 import crypto from "crypto"
 
@@ -96,6 +96,9 @@ export class BinanceBroker extends BaseBroker {
 
   async placeOrder(order: OrderRequest): Promise<OrderResponse> {
     try {
+      // Fetch symbol filters and normalize order to comply with exchange rules
+      const filters = await this.getSymbolInfo(order.symbol)
+      order = this.normalizeOrder(filters, order)
       const params = {
         symbol: order.symbol,
         side: order.side.toUpperCase(),
@@ -188,6 +191,31 @@ export class BinanceBroker extends BaseBroker {
       return Number.parseFloat(result.price)
     } catch (error) {
       logger.error("Failed to get Binance price", { symbol, error })
+      throw error
+    }
+  }
+
+  async getSymbolInfo(symbol: string): Promise<SymbolFilters> {
+    try {
+      const info = await this.makeRequest("/exchangeInfo", "GET")
+      const s = info.symbols.find((x: any) => x.symbol === symbol)
+      if (!s) throw new Error(`Symbol not found: ${symbol}`)
+      const lot = s.filters.find((f: any) => f.filterType === "LOT_SIZE")
+      const price = s.filters.find((f: any) => f.filterType === "PRICE_FILTER")
+      const notional = s.filters.find((f: any) => f.filterType === "NOTIONAL") || { minNotional: 10 }
+      return {
+        symbol: s.symbol,
+        baseAsset: s.baseAsset,
+        quoteAsset: s.quoteAsset,
+        minQty: parseFloat(lot.minQty),
+        stepSize: parseFloat(lot.stepSize),
+        tickSize: parseFloat(price.tickSize),
+        minNotional: parseFloat(notional.minNotional || "10"),
+        pricePrecision: s.quotePrecision,
+        quantityPrecision: s.baseAssetPrecision,
+      }
+    } catch (error) {
+      logger.error("Failed to fetch symbol info", { symbol, error })
       throw error
     }
   }

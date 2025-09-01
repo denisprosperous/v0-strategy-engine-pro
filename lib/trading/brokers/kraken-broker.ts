@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import { BaseBroker, type OrderRequest, type OrderResponse, type BalanceResponse } from "./base-broker"
+import { BaseBroker, type OrderRequest, type OrderResponse, type BalanceResponse, type SymbolFilters } from "./base-broker"
 import { config } from "@/lib/config/environment"
 import { logger } from "@/lib/utils/logger"
 
@@ -68,6 +68,8 @@ export class KrakenBroker extends BaseBroker {
 
   async placeOrder(order: OrderRequest): Promise<OrderResponse> {
     try {
+      const filters = await this.getSymbolInfo(order.symbol)
+      order = this.normalizeOrder(filters, order)
       const params = {
         pair: order.symbol,
         type: order.side,
@@ -124,6 +126,30 @@ export class KrakenBroker extends BaseBroker {
       return data.result[orderId]
     } catch (error) {
       logger.error("Kraken order status error", { error })
+      throw error
+    }
+  }
+
+  async getSymbolInfo(symbol: string): Promise<SymbolFilters> {
+    try {
+      const response = await fetch(`${this.baseUrl}/0/public/AssetPairs?pair=${symbol}`)
+      const data = await response.json()
+      if (data.error && data.error.length > 0) throw new Error(data.error.join(", "))
+      const key = Object.keys(data.result)[0]
+      const s = data.result[key]
+      return {
+        symbol: symbol,
+        baseAsset: s.base,
+        quoteAsset: s.quote,
+        minQty: parseFloat(s.ordermin || "0.0001"),
+        stepSize: parseFloat(`1e-${s.lot_decimals}`),
+        tickSize: parseFloat(`1e-${s.pair_decimals}`),
+        minNotional: 5,
+        pricePrecision: s.pair_decimals,
+        quantityPrecision: s.lot_decimals,
+      }
+    } catch (error) {
+      logger.error("Kraken getSymbolInfo error", { symbol, error })
       throw error
     }
   }

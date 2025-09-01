@@ -11,6 +11,7 @@ export interface TradingEngineConfig {
   riskPerTrade: number
   cooldownPeriod: number
   autoTrading: boolean
+  perAssetRiskBudgetPct?: number // e.g., 0.2 of total risk can be in one asset
 }
 
 export class TradingEngine {
@@ -119,7 +120,23 @@ export class TradingEngine {
 
       // Calculate position size
       const currentPrice = await this.broker.getPrice(signal.symbol)
-      const positionSize = this.calculatePositionSize(balance.free, currentPrice, signal)
+      let positionSize = this.calculatePositionSize(balance.free, currentPrice, signal)
+
+      // Per-asset risk budget: cap exposure per symbol
+      if (this.config.perAssetRiskBudgetPct) {
+        const existingExposure = Array.from(this.activeTrades.values())
+          .filter((t) => t.symbol === signal.symbol)
+          .reduce((sum, t) => sum + t.entry_price * t.quantity, 0)
+        const maxExposure = balance.free * this.config.perAssetRiskBudgetPct
+        const plannedExposure = currentPrice * positionSize
+        if (existingExposure + plannedExposure > maxExposure) {
+          positionSize = Math.max(0, (maxExposure - existingExposure) / currentPrice)
+          if (positionSize * currentPrice < 5) {
+            logger.info("Per-asset budget prevents new position", { symbol: signal.symbol })
+            return
+          }
+        }
+      }
 
       // Place order
       const order = await this.broker.placeOrder({
@@ -294,7 +311,15 @@ export class TradingEngine {
   }
 
   private shouldExecuteSignal(signal: TradeSignal): boolean {
-    // Additional risk checks
+    // Strategy rotation by regime: disable mean reversion in strong trends
+    if (signal.strategy_id === "mean_reversion") {
+      // Heuristic: skip when many momentum/breakout trades are active
+      const trendingActive = Array.from(this.activeTrades.values()).filter(
+        (t) => t.strategy_id === "breakout" || t.strategy_id === "momentum",
+      ).length
+      if (trendingActive > 0) return false
+    }
+
     return signal.strength >= 0.6 && this.activeTrades.size < this.config.maxConcurrentTrades
   }
 
