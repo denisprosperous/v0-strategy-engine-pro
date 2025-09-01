@@ -1,7 +1,7 @@
 // Core Telegram bot implementation
 import TelegramBot from "node-telegram-bot-api"
 import { config } from "@/lib/config/environment"
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
 import { marketDataAggregator } from "@/lib/market-data/aggregator"
 import { sentimentAnalyzer } from "@/lib/sentiment/analyzer"
@@ -243,7 +243,7 @@ Need help? Contact support or check our documentation.
 
     try {
       // Check if user is already registered
-      const { data: existingUser } = await supabase
+      const { data: existingUser } = await supabaseServer
         .from("users")
         .select("id, username")
         .eq("telegram_id", user.id.toString())
@@ -493,7 +493,7 @@ Choose your trading action:
 
       // Get today's trades and PnL
       const today = new Date().toISOString().split("T")[0]
-      const { data: todayTrades } = await supabase
+      const { data: todayTrades } = await supabaseServer
         .from("trades")
         .select("*")
         .eq("user_id", dbUser.id)
@@ -551,7 +551,7 @@ Last Updated: ${new Date().toLocaleTimeString()}
       }
 
       // Get open trades
-      const { data: openTrades } = await supabase
+      const { data: openTrades } = await supabaseServer
         .from("trades")
         .select("*")
         .eq("user_id", dbUser.id)
@@ -603,7 +603,7 @@ Last Updated: ${new Date().toLocaleTimeString()}
 
       const autoTradingEnabled = action === "on"
 
-      await supabase
+      await supabaseServer
         .from("users")
         .update({
           settings: {
@@ -702,7 +702,11 @@ Use the buttons below to modify your settings:
   // Notification methods
   async sendTradeAlert(userId: string, trade: any, type: "opened" | "closed"): Promise<void> {
     try {
-      const { data: user } = await supabase.from("users").select("telegram_id").eq("id", userId).single()
+      const { data: user } = await supabaseServer
+        .from("users")
+        .select("telegram_id")
+        .eq("id", userId)
+        .single()
 
       if (!user?.telegram_id) return
 
@@ -731,7 +735,11 @@ ${trade.pnl ? `📊 P&L: ${trade.pnl >= 0 ? "🟢" : "🔴"} $${trade.pnl.toFixe
 
   async sendPriceAlert(userId: string, symbol: string, price: number, condition: string): Promise<void> {
     try {
-      const { data: user } = await supabase.from("users").select("telegram_id").eq("id", userId).single()
+      const { data: user } = await supabaseServer
+        .from("users")
+        .select("telegram_id")
+        .eq("id", userId)
+        .single()
 
       if (!user?.telegram_id) return
 
@@ -754,7 +762,11 @@ ${trade.pnl ? `📊 P&L: ${trade.pnl >= 0 ? "🟢" : "🔴"} $${trade.pnl.toFixe
 
   // Helper methods
   private async getRegisteredUser(telegramId: number): Promise<any> {
-    const { data: user } = await supabase.from("users").select("*").eq("telegram_id", telegramId.toString()).single()
+    const { data: user } = await supabaseServer
+      .from("users")
+      .select("*")
+      .eq("telegram_id", telegramId.toString())
+      .single()
 
     return user
   }

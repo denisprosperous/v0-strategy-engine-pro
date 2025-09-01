@@ -15,8 +15,12 @@ export interface TechnicalIndicators {
   bollinger?: { upper: number; middle: number; lower: number }
   ema?: number
   sma?: number
+  emaFast?: number
+  emaSlow?: number
   volume?: number
   volatility?: number
+  atr?: number
+  adx?: number
 }
 
 export interface MarketContext {
@@ -61,6 +65,8 @@ export abstract class BaseStrategy {
     if (this.historicalData.length < 20) return
 
     const closes = this.historicalData.map((d) => d.close)
+    const highs = this.historicalData.map((d) => d.high)
+    const lows = this.historicalData.map((d) => d.low)
     const volumes = this.historicalData.map((d) => d.volume)
 
     // RSI calculation
@@ -71,6 +77,8 @@ export abstract class BaseStrategy {
 
     // Exponential Moving Average
     this.indicators.ema = this.calculateEMA(closes, 20)
+    this.indicators.emaFast = this.calculateEMA(closes, 12)
+    this.indicators.emaSlow = this.calculateEMA(closes, 26)
 
     // Bollinger Bands
     this.indicators.bollinger = this.calculateBollingerBands(closes, 20, 2)
@@ -83,6 +91,10 @@ export abstract class BaseStrategy {
 
     // Volatility (standard deviation of returns)
     this.indicators.volatility = this.calculateVolatility(closes, 20)
+
+    // ATR and ADX
+    this.indicators.atr = this.calculateATR(highs, lows, closes, 14)
+    this.indicators.adx = this.calculateADX(highs, lows, closes, 14)
   }
 
   protected calculateRSI(prices: number[], period = 14): number {
@@ -151,6 +163,78 @@ export abstract class BaseStrategy {
       signal,
       histogram: macd - signal,
     }
+  }
+
+  protected calculateATR(highs: number[], lows: number[], closes: number[], period = 14): number {
+    if (highs.length < period + 1) return 0
+    const trs: number[] = []
+    for (let i = 1; i < highs.length; i++) {
+      const high = highs[i]
+      const low = lows[i]
+      const prevClose = closes[i - 1]
+      const tr = Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose))
+      trs.push(tr)
+    }
+    // Wilder's smoothing
+    const initial = trs.slice(0, period).reduce((a, b) => a + b, 0) / period
+    let atr = initial
+    for (let i = period; i < trs.length; i++) {
+      atr = (atr * (period - 1) + trs[i]) / period
+    }
+    return atr
+  }
+
+  protected calculateADX(highs: number[], lows: number[], closes: number[], period = 14): number {
+    if (highs.length < period + 2) return 0
+    const dmPlus: number[] = []
+    const dmMinus: number[] = []
+    const tr: number[] = []
+    for (let i = 1; i < highs.length; i++) {
+      const upMove = highs[i] - highs[i - 1]
+      const downMove = lows[i - 1] - lows[i]
+      dmPlus.push(upMove > downMove && upMove > 0 ? upMove : 0)
+      dmMinus.push(downMove > upMove && downMove > 0 ? downMove : 0)
+      const thisTr = Math.max(
+        highs[i] - lows[i],
+        Math.abs(highs[i] - closes[i - 1]),
+        Math.abs(lows[i] - closes[i - 1]),
+      )
+      tr.push(thisTr)
+    }
+    const smooth = (arr: number[]) => {
+      const smoothed: number[] = []
+      let val = arr.slice(0, period).reduce((a, b) => a + b, 0)
+      smoothed.push(val)
+      for (let i = period; i < arr.length; i++) {
+        val = val - val / period + arr[i]
+        smoothed.push(val)
+      }
+      return smoothed
+    }
+    const trN = smooth(tr)
+    const dmPlusN = smooth(dmPlus)
+    const dmMinusN = smooth(dmMinus)
+    const diPlus = dmPlusN.map((v, i) => (trN[i] ? (100 * v) / trN[i] : 0))
+    const diMinus = dmMinusN.map((v, i) => (trN[i] ? (100 * v) / trN[i] : 0))
+    const dx = diPlus.map((v, i) => {
+      const m = diMinus[i]
+      const denom = v + m
+      return denom ? (100 * Math.abs(v - m)) / denom : 0
+    })
+    const adx = dx.slice(period - 1).reduce((a, b) => a + b, 0) / (dx.length - (period - 1))
+    return adx || 0
+  }
+
+  protected isTrending(): boolean {
+    const adx = this.indicators.adx || 0
+    const emaFast = this.indicators.emaFast || 0
+    const emaSlow = this.indicators.emaSlow || 0
+    return adx > 20 && emaFast > emaSlow
+  }
+
+  protected isRanging(): boolean {
+    const adx = this.indicators.adx || 0
+    return adx < 18
   }
 
   protected calculateVolatility(prices: number[], period: number): number {

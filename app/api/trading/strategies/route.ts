@@ -1,13 +1,13 @@
 // API endpoints for strategy management
 import { NextResponse } from "next/server"
 import { withAuth, type AuthenticatedRequest } from "@/lib/auth/middleware"
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
 
 // Get all strategies
 async function getStrategiesHandler(req: AuthenticatedRequest) {
   try {
-    const { data: strategies, error } = await supabase
+    const { data: strategies, error } = await supabaseServer
       .from("strategies")
       .select("*")
       .eq("is_active", true)
@@ -34,7 +34,7 @@ async function manageStrategyHandler(req: AuthenticatedRequest) {
 
     if (id) {
       // Update existing strategy
-      const { data: strategy, error } = await supabase
+      const { data: strategy, error } = await supabaseServer
         .from("strategies")
         .update({
           name,
@@ -55,7 +55,7 @@ async function manageStrategyHandler(req: AuthenticatedRequest) {
       return NextResponse.json({ success: true, strategy })
     } else {
       // Create new strategy
-      const { data: strategy, error } = await supabase
+      const { data: strategy, error } = await supabaseServer
         .from("strategies")
         .insert({
           name,

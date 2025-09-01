@@ -135,6 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
+    // Clear client token and cookie via API
+    fetch("/api/auth/logout", { method: "POST" }).catch(() => {})
     setUser(null)
     setToken(null)
     localStorage.removeItem("auth-token")

@@ -15,17 +15,15 @@ export const config = {
 
   // Trading APIs
   bitget: {
-    apiKey: process.env.BITGET_API_KEY || "bg_fe79979849aa59d99719eec52b6d1b8c",
-    apiSecret: process.env.BITGET_API_SECRET || "aef1207a95c75afff9a1d47d83f34ad9cb007e86973ea54feeebfe9a696b0fc4",
-    passphrase: process.env.BITGET_PASSPHRASE || "V4axZOr8RAL94CklbDZoZa1E1WVoeBR6",
+    apiKey: process.env.BITGET_API_KEY,
+    apiSecret: process.env.BITGET_API_SECRET,
+    passphrase: process.env.BITGET_PASSPHRASE,
     testnet: process.env.BITGET_TESTNET === "true",
   },
 
   kraken: {
-    apiKey: process.env.KRAKEN_API_KEY || "9Iz2QHeCmB2ofT8fepeb3yeCjp4te8i5nEo4jz/ps/oempYyBbCzWIpy",
-    privateKey:
-      process.env.KRAKEN_PRIVATE_KEY ||
-      "pWxh/WKnVeNqnqaKgyDikZSzEsLtxXjGMBLBsZPr8/73l0nlLoZFYmvqx0Ql5zO8egzou3pZMQOYSCGplYB0Ag==",
+    apiKey: process.env.KRAKEN_API_KEY,
+    privateKey: process.env.KRAKEN_PRIVATE_KEY,
     testnet: process.env.KRAKEN_TESTNET === "true",
   },
 
@@ -43,23 +41,21 @@ export const config = {
 
   // Telegram Bot
   telegram: {
-    botToken: process.env.TELEGRAM_BOT_TOKEN || "7893667413:AAESqhx7CopR5aGmJduadf-EK83k9yDHPTI",
+    botToken: process.env.TELEGRAM_BOT_TOKEN,
     webhookUrl: process.env.TELEGRAM_WEBHOOK_URL,
-    botUsername: "smart_neuralbot",
+    botUsername: process.env.TELEGRAM_BOT_USERNAME || "smart_neuralbot",
   },
 
   // External APIs
   apis: {
-    newsApi: process.env.NEWS_API_KEY || "0772a2d7e16020fc5a65482655fcf297",
-    currentsApi: process.env.CURRENTS_API_KEY || "O6uIVd-L_82zb3_nfK23Bvzl4GbjFHW9QHDlOtxNnEbOXMwe",
-    rapidApiKey: process.env.RAPIDAPI_KEY || "b2476f4726msh396ea7bc6562ac8p16eb73jsn9bd0afb26b93",
+    newsApi: process.env.NEWS_API_KEY,
+    currentsApi: process.env.CURRENTS_API_KEY,
+    rapidApiKey: process.env.RAPIDAPI_KEY,
     twitterBearer: process.env.TWITTER_BEARER_TOKEN,
     redditClientId: process.env.REDDIT_CLIENT_ID,
     redditClientSecret: process.env.REDDIT_CLIENT_SECRET,
-    openaiApiKey:
-      process.env.OPENAI_API_KEY ||
-      "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",
-    huggingfaceToken: process.env.HUGGINGFACE_TOKEN || "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",
+    openaiApiKey: process.env.OPENAI_API_KEY,
+    huggingfaceToken: process.env.HUGGINGFACE_TOKEN,
   },
 
   // Redis Cache
@@ -78,17 +74,20 @@ export const config = {
 
   // AI/ML
   ai: {
-    openaiApiKey:
-      process.env.OPENAI_API_KEY ||
-      "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",
-    huggingfaceToken: process.env.HUGGINGFACE_TOKEN || "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",
+    openaiApiKey: process.env.OPENAI_API_KEY,
+    huggingfaceToken: process.env.HUGGINGFACE_TOKEN,
     modelUpdateInterval: Number.parseInt(process.env.MODEL_UPDATE_INTERVAL_HOURS || "24"),
   },
 }
 
 // Validate required environment variables
 export function validateEnvironment() {
-  const required = ["DATABASE_URL", "JWT_SECRET", "TELEGRAM_BOT_TOKEN"]
+  const required = [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "JWT_SECRET",
+    "TELEGRAM_BOT_TOKEN",
+  ]
 
   const missing = required.filter((key) => !process.env[key])
 

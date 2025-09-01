@@ -1,6 +1,7 @@
 // Market data aggregation service for multiple exchanges
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
+import { redis } from "@/lib/config/redis"
 
 export interface PriceData {
   symbol: string
@@ -81,6 +82,13 @@ export class MarketDataAggregator {
       return cached.price
     }
 
+    // Upstash cache: 5s TTL to shield APIs
+    if (redis) {
+      const rKey = `price:${symbol}`
+      const rVal = await redis.get<number>(rKey)
+      if (typeof rVal === "number") return rVal
+    }
+
     // Fetch fresh price from multiple sources
     const prices = await Promise.allSettled([this.fetchBinancePrice(symbol), this.fetchCoinGeckoPrice(symbol)])
 
@@ -93,13 +101,19 @@ export class MarketDataAggregator {
     }
 
     // Use average of available prices
-    return validPrices.reduce((sum, price) => sum + price, 0) / validPrices.length
+    const avg = validPrices.reduce((sum, price) => sum + price, 0) / validPrices.length
+
+    if (redis) {
+      await redis.set(`price:${symbol}`, avg, { ex: 5 })
+    }
+
+    return avg
   }
 
   async getHistoricalData(symbol: string, timeframe: string, limit = 100): Promise<CandleData[]> {
     try {
       // First try to get from database
-      const { data: dbData, error } = await supabase
+      const { data: dbData, error } = await supabaseServer
         .from("market_data")
         .select("*")
         .eq("symbol", symbol)
@@ -204,6 +218,23 @@ export class MarketDataAggregator {
 
   private async fetchBinanceKlines(symbol: string, timeframe: string, limit: number): Promise<CandleData[]> {
     try {
+      if (redis) {
+        const key = `klines:${symbol}:${timeframe}:${limit}`
+        const cached = await redis.get<CandleData[]>(key)
+        if (cached && Array.isArray(cached) && cached.length > 0) return cached
+        const data = await this._fetchBinanceKlines(symbol, timeframe, limit)
+        await redis.set(key, data, { ex: 60 })
+        return data
+      }
+      return await this._fetchBinanceKlines(symbol, timeframe, limit)
+    } catch (error) {
+      logger.error("Failed to fetch Binance klines", { symbol, timeframe, error })
+      throw error
+    }
+  }
+
+  private async _fetchBinanceKlines(symbol: string, timeframe: string, limit: number): Promise<CandleData[]> {
+    try {
       const interval = this.timeframeToInterval(timeframe)
       const response = await fetch(
         `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`,
@@ -253,7 +284,7 @@ export class MarketDataAggregator {
 
   private async storeMarketData(candle: CandleData): Promise<void> {
     try {
-      await supabase.from("market_data").upsert({
+      await supabaseServer.from("market_data").upsert({
         symbol: candle.symbol,
         timestamp: candle.timestamp.toISOString(),
         open: candle.open,

@@ -8,6 +8,8 @@ interface MeanReversionConfig extends StrategyConfig {
   rsiOverbought: number
   bollingerPeriod: number
   bollingerStdDev: number
+  atrMultiplierSL: number
+  atrMultiplierTP: number
 }
 
 export class MeanReversionStrategy extends BaseStrategy {
@@ -37,6 +39,9 @@ export class MeanReversionStrategy extends BaseStrategy {
 
     if (!bollinger) return null
 
+    // Gate by regime: prefer ranging
+    if (!this.isRanging()) return null
+
     // Bullish mean reversion signal
     if (
       rsi < this.config.rsiOversold &&
@@ -47,6 +52,7 @@ export class MeanReversionStrategy extends BaseStrategy {
       const bollingerStrength = (bollinger.lower - current.close) / (bollinger.middle - bollinger.lower)
       const strength = Math.min(rsiStrength * 0.6 + bollingerStrength * 0.4, 1.0)
 
+      const atr = this.indicators.atr || current.close * 0.01
       return {
         id: `mean_reversion_${Date.now()}`,
         strategy_id: "mean_reversion",
@@ -54,8 +60,8 @@ export class MeanReversionStrategy extends BaseStrategy {
         signal_type: "buy",
         strength,
         price_target: bollinger.middle,
-        stop_loss: current.close * (1 - this.config.stopLossPct),
-        take_profit: current.close * (1 + this.config.takeProfitPct),
+        stop_loss: current.close - atr * this.config.atrMultiplierSL,
+        take_profit: current.close + atr * this.config.atrMultiplierTP,
         reasoning: `Mean reversion buy: RSI ${rsi.toFixed(1)} oversold, price below lower Bollinger Band`,
         created_at: new Date(),
         executed: false,
@@ -72,6 +78,7 @@ export class MeanReversionStrategy extends BaseStrategy {
       const bollingerStrength = (current.close - bollinger.upper) / (bollinger.upper - bollinger.middle)
       const strength = Math.min(rsiStrength * 0.6 + bollingerStrength * 0.4, 1.0)
 
+      const atr = this.indicators.atr || current.close * 0.01
       return {
         id: `mean_reversion_${Date.now()}`,
         strategy_id: "mean_reversion",
@@ -79,8 +86,8 @@ export class MeanReversionStrategy extends BaseStrategy {
         signal_type: "sell",
         strength,
         price_target: bollinger.middle,
-        stop_loss: current.close * (1 + this.config.stopLossPct),
-        take_profit: current.close * (1 - this.config.takeProfitPct),
+        stop_loss: current.close + atr * this.config.atrMultiplierSL,
+        take_profit: current.close - atr * this.config.atrMultiplierTP,
         reasoning: `Mean reversion sell: RSI ${rsi.toFixed(1)} overbought, price above upper Bollinger Band`,
         created_at: new Date(),
         executed: false,

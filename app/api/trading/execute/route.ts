@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { withAuth, type AuthenticatedRequest } from "@/lib/auth/middleware"
 import { BinanceBroker } from "@/lib/trading/brokers/binance-broker"
 import { config } from "@/lib/config/environment"
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
 
 interface TradeRequest {
@@ -31,7 +31,7 @@ async function executeTradeHandler(req: AuthenticatedRequest) {
     }
 
     // Get user's API keys
-    const { data: user, error: userError } = await supabase
+    const { data: user, error: userError } = await supabaseServer
       .from("users")
       .select("api_keys, settings")
       .eq("id", req.user.userId)
@@ -65,7 +65,7 @@ async function executeTradeHandler(req: AuthenticatedRequest) {
 
       // Check daily loss limit
       const today = new Date().toISOString().split("T")[0]
-      const { data: todayTrades } = await supabase
+      const { data: todayTrades } = await supabaseServer
         .from("trades")
         .select("pnl")
         .eq("user_id", req.user.userId)
@@ -107,7 +107,11 @@ async function executeTradeHandler(req: AuthenticatedRequest) {
         },
       }
 
-      const { data: savedTrade, error: tradeError } = await supabase.from("trades").insert(trade).select().single()
+      const { data: savedTrade, error: tradeError } = await supabaseServer
+        .from("trades")
+        .insert(trade)
+        .select()
+        .single()
 
       if (tradeError) {
         logger.error("Failed to save trade to database", { tradeError, trade })
