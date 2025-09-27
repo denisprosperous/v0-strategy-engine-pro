@@ -99,3 +99,43 @@ export interface TradeSignal {
   created_at: Date
   executed: boolean
 }
+
+export interface TradingAccount {
+  id: string
+  user_id: string
+  account_type: "demo" | "live"
+  account_name: string
+  balance: number
+  currency: "USD" | "USDT" | "BTC" | "ETH"
+  broker: "binance" | "bitget" | "demo"
+  api_credentials?: {
+    api_key: string
+    api_secret: string
+    passphrase?: string
+  }
+  is_active: boolean
+  created_at: Date
+  updated_at: Date
+}
+
+export interface AccountTransaction {
+  id: string
+  account_id: string
+  transaction_type: "deposit" | "withdrawal" | "trade_profit" | "trade_loss" | "fee" | "demo_reset"
+  amount: number
+  currency: string
+  description: string
+  reference_id?: string // Trade ID or external reference
+  timestamp: Date
+  metadata?: Record<string, any>
+}
+
+export interface AccountBalance {
+  account_id: string
+  total_balance: number
+  available_balance: number
+  reserved_balance: number // Amount in open positions
+  unrealized_pnl: number
+  currency: string
+  last_updated: Date
+}

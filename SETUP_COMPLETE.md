@@ -13,7 +13,7 @@ Congratulations! Your AI-powered cryptocurrency trading bot has been successfull
 - **Sentiment Analysis**: Multi-source news and social sentiment
 
 ### 📁 Project Structure
-```
+\`\`\`
 Strategy Engine Pro/
 ├── app/
 │   ├── config/          # Settings with your API keys
@@ -28,18 +28,18 @@ Strategy Engine Pro/
 ├── requirements.txt   # All dependencies
 ├── config.env         # Your API credentials
 └── README.md          # Complete documentation
-```
+\`\`\`
 
 ## 🚀 Next Steps
 
 ### 1. Test Your Setup
-```bash
+\`\`\`bash
 # Run the test script to verify everything works
 python test_setup.py
-```
+\`\`\`
 
 ### 2. Start the Application
-```bash
+\`\`\`bash
 # Option 1: Use the startup script
 ./start.sh
 
@@ -48,7 +48,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python main.py
-```
+\`\`\`
 
 ### 3. Connect to Your Telegram Bot
 1. Open Telegram
@@ -121,30 +121,30 @@ python main.py
 ## 🧪 Testing Your Bot
 
 ### 1. Price Checking
-```
+\`\`\`
 /price BTC/USDT
 /price ETH/USDT
 /price SOL/USDT
-```
+\`\`\`
 
 ### 2. Portfolio Management
-```
+\`\`\`
 /portfolio
 /balance
-```
+\`\`\`
 
 ### 3. AI Analysis
-```
+\`\`\`
 /analyze BTC/USDT
 /sentiment ETH/USDT
 /recommendations
-```
+\`\`\`
 
 ### 4. System Status
-```
+\`\`\`
 /status
 /settings
-```
+\`\`\`
 
 ## 🔍 Monitoring & Logs
 

@@ -55,7 +55,7 @@
 
 ### 1. Installation
 
-```bash
+\`\`\`bash
 # Clone the repository
 git clone https://github.com/your-username/strategy-engine-pro.git
 cd strategy-engine-pro
@@ -66,13 +66,13 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
-```
+\`\`\`
 
 ### 2. Configuration
 
 Create a `.env` file with your API keys:
 
-```env
+\`\`\`env
 # Exchange API Keys
 BINANCE_API_KEY=your_binance_api_key
 BINANCE_SECRET_KEY=your_binance_secret_key
@@ -100,27 +100,27 @@ TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 
 # Security
 ENCRYPTION_KEY=your_32_character_encryption_key
-```
+\`\`\`
 
 ### 3. Database Setup
 
-```bash
+\`\`\`bash
 # Initialize database
 python -c "from database.database import init_db; init_db()"
-```
+\`\`\`
 
 ### 4. Start the Platform
 
-```bash
+\`\`\`bash
 # Start the main application
 python main.py
-```
+\`\`\`
 
 ## 📖 Usage Guide
 
 ### Telegram Bot Commands
 
-```
+\`\`\`
 🤖 Core Commands
 /start - Welcome message and main menu
 /help - Show all available commands
@@ -150,7 +150,7 @@ python main.py
 /follow [user_id] - Follow a trader
 /copy [signal_id] - Copy a trade signal
 /share_signal - Share your signal
-```
+\`\`\`
 
 ### Trading Modes
 
@@ -180,7 +180,7 @@ python main.py
 
 ## 🏗️ Architecture
 
-```
+\`\`\`
 Strategy Engine Pro/
 ├── 📁 exchanges/           # Exchange integrations
 │   ├── base_exchange.py   # Abstract base class
@@ -211,13 +211,13 @@ Strategy Engine Pro/
 │   └── config/            # Configuration
 └── 📁 tests/              # Test suite
     └── test_comprehensive.py
-```
+\`\`\`
 
 ## 🔧 Configuration
 
 ### Risk Management Settings
 
-```python
+\`\`\`python
 risk_params = RiskParameters(
     max_position_size=0.05,      # 5% per position
     max_portfolio_risk=0.02,     # 2% risk per trade
@@ -230,11 +230,11 @@ risk_params = RiskParameters(
     stop_loss_pct=0.02,          # 2% stop loss
     take_profit_pct=0.06         # 6% take profit
 )
-```
+\`\`\`
 
 ### Trading Configuration
 
-```python
+\`\`\`python
 trading_config = TradingConfig(
     mode=TradingMode.AUTO,
     max_positions=10,
@@ -245,7 +245,7 @@ trading_config = TradingConfig(
     auto_rebalance=True,
     rebalance_frequency="daily"
 )
-```
+\`\`\`
 
 ## 📊 Performance Metrics
 
@@ -285,7 +285,7 @@ trading_config = TradingConfig(
 
 ### Run Test Suite
 
-```bash
+\`\`\`bash
 # Run all tests
 python -m pytest tests/
 
@@ -296,7 +296,7 @@ python -m pytest tests/test_ai_models.py
 python -m pytest tests/test_trading_modes.py
 python -m pytest tests/test_analytics.py
 python -m pytest tests/test_social_trading.py
-```
+\`\`\`
 
 ### Test Coverage
 
@@ -309,21 +309,21 @@ python -m pytest tests/test_social_trading.py
 
 ### Local Development
 
-```bash
+\`\`\`bash
 # Development mode
 python main.py --debug --log-level=DEBUG
-```
+\`\`\`
 
 ### Production Deployment
 
-```bash
+\`\`\`bash
 # Production mode
 python main.py --production --log-level=INFO
-```
+\`\`\`
 
 ### Docker Deployment
 
-```dockerfile
+\`\`\`dockerfile
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -334,7 +334,7 @@ COPY . .
 EXPOSE 8000
 
 CMD ["python", "main.py"]
-```
+\`\`\`
 
 ## 📈 Roadmap
 

@@ -1,8 +1,8 @@
-// Next.js middleware for route protection
+// Next.js middleware for route protection - Edge Runtime compatible
 import { type NextRequest, NextResponse } from "next/server"
 import { verifyToken, extractTokenFromHeader } from "@/lib/auth/jwt"
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Protected routes that require authentication
@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
     }
 
     try {
-      const user = verifyToken(token)
+      const user = await verifyToken(token)
       if (!user) {
         // Redirect to login if invalid token
         const loginUrl = new URL("/auth/login", request.url)

@@ -17,7 +17,7 @@ export function withAuth(handler: (req: AuthenticatedRequest) => Promise<NextRes
         return NextResponse.json({ error: "Authentication required" }, { status: 401 })
       }
 
-      const user = verifyToken(token)
+      const user = await verifyToken(token)
       if (!user) {
         return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 })
       }
@@ -85,7 +85,7 @@ export async function authMiddleware(req: NextRequest): Promise<{
       return { success: false, error: "Authentication required" }
     }
 
-    const user = verifyToken(token)
+    const user = await verifyToken(token)
     if (!user) {
       return { success: false, error: "Invalid or expired token" }
     }

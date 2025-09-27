@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Play, Pause, Settings, Bot } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+import { Play, Pause, Settings, Bot, Loader2 } from "lucide-react"
 
 const strategies = [
   {
@@ -89,10 +90,54 @@ const strategies = [
 
 export function StrategyManager() {
   const [selectedStrategy, setSelectedStrategy] = useState(strategies[0])
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({})
+  const { toast } = useToast()
 
-  const toggleStrategy = (strategyId: string) => {
-    // In a real app, this would make an API call
-    console.log(`Toggling strategy: ${strategyId}`)
+  const toggleStrategy = async (strategyId: string) => {
+    setLoadingStates((prev) => ({ ...prev, [strategyId]: true }))
+
+    try {
+      const strategy = strategies.find((s) => s.id === strategyId)
+      const isActive = strategy?.status === "active"
+
+      const endpoint = isActive ? "/api/trading/strategies/stop" : "/api/trading/strategies/start"
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ strategyId }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to toggle strategy")
+      }
+
+      // Update local state
+      if (strategy) {
+        strategy.status = isActive ? "paused" : "active"
+        if (selectedStrategy.id === strategyId) {
+          setSelectedStrategy({ ...strategy })
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: data.message,
+      })
+    } catch (error) {
+      console.error("Strategy toggle error:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to toggle strategy",
+        variant: "destructive",
+      })
+    } finally {
+      setLoadingStates((prev) => ({ ...prev, [strategyId]: false }))
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -227,18 +272,24 @@ export function StrategyManager() {
               </div>
               <div className="flex items-center space-x-2">
                 {getStatusBadge(selectedStrategy.status)}
-                <Button variant="outline" size="sm" onClick={() => toggleStrategy(selectedStrategy.id)}>
-                  {selectedStrategy.status === "active" ? (
-                    <>
-                      <Pause className="w-4 h-4 mr-2" />
-                      Pause
-                    </>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => toggleStrategy(selectedStrategy.id)}
+                  disabled={loadingStates[selectedStrategy.id]}
+                >
+                  {loadingStates[selectedStrategy.id] ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : selectedStrategy.status === "active" ? (
+                    <Pause className="w-4 h-4 mr-2" />
                   ) : (
-                    <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Start
-                    </>
+                    <Play className="w-4 h-4 mr-2" />
                   )}
+                  {loadingStates[selectedStrategy.id]
+                    ? "Processing..."
+                    : selectedStrategy.status === "active"
+                      ? "Pause"
+                      : "Start"}
                 </Button>
                 <Button variant="outline" size="sm">
                   <Settings className="w-4 h-4 mr-2" />

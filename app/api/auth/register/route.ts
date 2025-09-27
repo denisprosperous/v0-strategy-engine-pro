@@ -64,7 +64,7 @@ async function registerHandler(req: NextRequest) {
     }
 
     // Generate JWT token
-    const token = signToken({
+    const token = await signToken({
       userId: newUser.id,
       username: newUser.username,
       email: newUser.email,

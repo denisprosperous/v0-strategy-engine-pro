@@ -1,5 +1,5 @@
-// JWT token utilities for authentication
-import jwt from "jsonwebtoken"
+// JWT token utilities for authentication - Edge Runtime compatible
+import { SignJWT, jwtVerify } from "jose"
 import { config } from "@/lib/config/environment"
 
 export interface JWTPayload {
@@ -11,32 +11,37 @@ export interface JWTPayload {
   exp?: number
 }
 
-function getJWTSecret(): string {
+function getJWTSecret(): Uint8Array {
   const secret = config.auth.jwtSecret
   if (!secret || secret === "your-super-secret-jwt-key") {
     throw new Error("JWT_SECRET environment variable is required and must be set to a secure value")
   }
-  return secret
+  return new TextEncoder().encode(secret)
 }
 
-export function signToken(payload: Omit<JWTPayload, "iat" | "exp">): string {
+export async function signToken(payload: Omit<JWTPayload, "iat" | "exp">): Promise<string> {
   try {
-    return jwt.sign(payload, getJWTSecret(), {
-      expiresIn: config.auth.jwtExpiry,
-    })
+    const jwt = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime(config.auth.jwtExpiry)
+      .sign(getJWTSecret())
+
+    return jwt
   } catch (error) {
     console.error("[v0] JWT signing error:", error)
     throw new Error("Failed to sign JWT token")
   }
 }
 
-export function verifyToken(token: string): JWTPayload | null {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     if (!token) {
       return null
     }
-    const decoded = jwt.verify(token, getJWTSecret()) as JWTPayload
-    return decoded
+
+    const { payload } = await jwtVerify(token, getJWTSecret())
+    return payload as JWTPayload
   } catch (error) {
     console.error("[v0] JWT verification error:", error)
     return null
