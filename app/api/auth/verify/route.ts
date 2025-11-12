@@ -1,7 +1,7 @@
 // Token verification API endpoint
 import { NextResponse } from "next/server"
 import { withAuth, type AuthenticatedRequest } from "@/lib/auth/middleware"
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
 
 async function verifyHandler(req: AuthenticatedRequest) {
@@ -11,7 +11,7 @@ async function verifyHandler(req: AuthenticatedRequest) {
     }
 
     // Fetch fresh user data from database
-    const { data: user, error } = await supabase
+    const { data: user, error } = await supabaseServer
       .from("users")
       .select("id, username, email, role, telegram_id, settings")
       .eq("id", req.user.userId)

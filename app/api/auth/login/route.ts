@@ -1,6 +1,6 @@
 // User login API endpoint
 import { type NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { verifyPassword } from "@/lib/auth/password"
 import { signToken } from "@/lib/auth/jwt"
 import { withRateLimit } from "@/lib/auth/middleware"
@@ -22,7 +22,7 @@ async function loginHandler(req: NextRequest) {
     }
 
     // Find user by username or email
-    const { data: user, error } = await supabase
+    const { data: user, error } = await supabaseServer
       .from("users")
       .select("id, username, email, password_hash, role, telegram_id")
       .or(`username.eq.${username},email.eq.${username}`)
@@ -49,11 +49,11 @@ async function loginHandler(req: NextRequest) {
     })
 
     // Update last login timestamp
-    await supabase.from("users").update({ updated_at: new Date().toISOString() }).eq("id", user.id)
+    await supabaseServer.from("users").update({ updated_at: new Date().toISOString() }).eq("id", user.id)
 
     logger.info("User logged in successfully", { userId: user.id, username: user.username })
 
-    return NextResponse.json({
+    const res = NextResponse.json({
       success: true,
       token,
       user: {
@@ -64,6 +64,17 @@ async function loginHandler(req: NextRequest) {
         telegramId: user.telegram_id,
       },
     })
+
+    // Set HttpOnly auth cookie for middleware-protected routes
+    res.cookies.set("auth-token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24, // 1 day
+    })
+
+    return res
   } catch (error) {
     logger.error("Login endpoint error", { error })
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

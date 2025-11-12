@@ -1,7 +1,7 @@
 // Core trading engine that orchestrates strategy execution and order management
 import type { BaseBroker } from "../brokers/base-broker"
 import type { BaseStrategy } from "../strategies/base-strategy"
-import { supabase } from "@/lib/config/database"
+import { supabaseServer } from "@/lib/config/supabase-server"
 import { logger } from "@/lib/utils/logger"
 import type { MarketData, Trade, TradeSignal } from "@/lib/database/schema"
 
@@ -11,6 +11,7 @@ export interface TradingEngineConfig {
   riskPerTrade: number
   cooldownPeriod: number
   autoTrading: boolean
+  perAssetRiskBudgetPct?: number // e.g., 0.2 of total risk can be in one asset
 }
 
 export class TradingEngine {
@@ -119,7 +120,23 @@ export class TradingEngine {
 
       // Calculate position size
       const currentPrice = await this.broker.getPrice(signal.symbol)
-      const positionSize = this.calculatePositionSize(balance.free, currentPrice, signal)
+      let positionSize = this.calculatePositionSize(balance.free, currentPrice, signal)
+
+      // Per-asset risk budget: cap exposure per symbol
+      if (this.config.perAssetRiskBudgetPct) {
+        const existingExposure = Array.from(this.activeTrades.values())
+          .filter((t) => t.symbol === signal.symbol)
+          .reduce((sum, t) => sum + t.entry_price * t.quantity, 0)
+        const maxExposure = balance.free * this.config.perAssetRiskBudgetPct
+        const plannedExposure = currentPrice * positionSize
+        if (existingExposure + plannedExposure > maxExposure) {
+          positionSize = Math.max(0, (maxExposure - existingExposure) / currentPrice)
+          if (positionSize * currentPrice < 5) {
+            logger.info("Per-asset budget prevents new position", { symbol: signal.symbol })
+            return
+          }
+        }
+      }
 
       // Place order
       const order = await this.broker.placeOrder({
@@ -151,14 +168,14 @@ export class TradingEngine {
       }
 
       // Save to database
-      await supabase.from("trades").insert(trade)
+      await supabaseServer.from("trades").insert(trade)
 
       // Add to active trades
       this.activeTrades.set(trade.id, trade)
       this.lastTradeTime = Date.now()
 
       // Mark signal as executed
-      await supabase.from("trade_signals").update({ executed: true }).eq("id", signal.id)
+      await supabaseServer.from("trade_signals").update({ executed: true }).eq("id", signal.id)
 
       logger.info("Trade executed successfully", { trade, signal })
 
@@ -180,7 +197,7 @@ export class TradingEngine {
 
   private async loadActiveTrades(): Promise<void> {
     try {
-      const { data: trades, error } = await supabase.from("trades").select("*").eq("status", "open")
+      const { data: trades, error } = await supabaseServer.from("trades").select("*").eq("status", "open")
 
       if (error) throw error
 
@@ -263,7 +280,7 @@ export class TradingEngine {
       this.dailyPnL += pnl
 
       // Update trade in database
-      await supabase
+      await supabaseServer
         .from("trades")
         .update({
           status: "closed",
@@ -294,7 +311,15 @@ export class TradingEngine {
   }
 
   private shouldExecuteSignal(signal: TradeSignal): boolean {
-    // Additional risk checks
+    // Strategy rotation by regime: disable mean reversion in strong trends
+    if (signal.strategy_id === "mean_reversion") {
+      // Heuristic: skip when many momentum/breakout trades are active
+      const trendingActive = Array.from(this.activeTrades.values()).filter(
+        (t) => t.strategy_id === "breakout" || t.strategy_id === "momentum",
+      ).length
+      if (trendingActive > 0) return false
+    }
+
     return signal.strength >= 0.6 && this.activeTrades.size < this.config.maxConcurrentTrades
   }
 

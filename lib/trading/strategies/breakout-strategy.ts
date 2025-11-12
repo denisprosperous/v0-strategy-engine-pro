@@ -6,6 +6,8 @@ interface BreakoutConfig extends StrategyConfig {
   volumeThreshold: number
   priceChangeThreshold: number
   lookbackPeriod: number
+  atrMultiplierSL: number
+  atrMultiplierTP: number
 }
 
 export class BreakoutStrategy extends BaseStrategy {
@@ -45,6 +47,9 @@ export class BreakoutStrategy extends BaseStrategy {
     const priceChange = (current.close - current.open) / current.open
     const volumeIncrease = current.volume / avgVolume
 
+    // Gate by regime: prefer trending conditions
+    if (!this.isTrending()) return null
+
     // Bullish breakout
     if (
       current.close > resistance &&
@@ -58,15 +63,16 @@ export class BreakoutStrategy extends BaseStrategy {
         1.0,
       )
 
+      const atr = this.indicators.atr || current.close * 0.01
       return {
         id: `breakout_${Date.now()}`,
         strategy_id: "breakout",
         symbol: current.symbol,
         signal_type: "buy",
         strength,
-        price_target: current.close * (1 + this.config.takeProfitPct),
-        stop_loss: current.close * (1 - this.config.stopLossPct),
-        take_profit: current.close * (1 + this.config.takeProfitPct),
+        price_target: current.close + atr * this.config.atrMultiplierTP,
+        stop_loss: current.close - atr * this.config.atrMultiplierSL,
+        take_profit: current.close + atr * this.config.atrMultiplierTP,
         reasoning: `Bullish breakout above resistance ${resistance.toFixed(4)} with ${volumeIncrease.toFixed(1)}x volume`,
         created_at: new Date(),
         executed: false,
@@ -86,15 +92,16 @@ export class BreakoutStrategy extends BaseStrategy {
         1.0,
       )
 
+      const atr = this.indicators.atr || current.close * 0.01
       return {
         id: `breakout_${Date.now()}`,
         strategy_id: "breakout",
         symbol: current.symbol,
         signal_type: "sell",
         strength,
-        price_target: current.close * (1 - this.config.takeProfitPct),
-        stop_loss: current.close * (1 + this.config.stopLossPct),
-        take_profit: current.close * (1 - this.config.takeProfitPct),
+        price_target: current.close - atr * this.config.atrMultiplierTP,
+        stop_loss: current.close + atr * this.config.atrMultiplierSL,
+        take_profit: current.close - atr * this.config.atrMultiplierTP,
         reasoning: `Bearish breakdown below support ${support.toFixed(4)} with ${volumeIncrease.toFixed(1)}x volume`,
         created_at: new Date(),
         executed: false,

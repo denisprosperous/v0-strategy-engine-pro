@@ -1,5 +1,5 @@
 import crypto from "crypto"
-import { BaseBroker, type OrderRequest, type OrderResponse, type BalanceResponse } from "./base-broker"
+import { BaseBroker, type OrderRequest, type OrderResponse, type BalanceResponse, type SymbolFilters } from "./base-broker"
 import { config } from "@/lib/config/environment"
 import { logger } from "@/lib/utils/logger"
 
@@ -67,6 +67,8 @@ export class BitgetBroker extends BaseBroker {
 
   async placeOrder(order: OrderRequest): Promise<OrderResponse> {
     try {
+      const filters = await this.getSymbolInfo(order.symbol)
+      order = this.normalizeOrder(filters, order)
       const requestPath = "/api/spot/v1/trade/orders"
       const body = JSON.stringify({
         symbol: order.symbol,
@@ -155,6 +157,31 @@ export class BitgetBroker extends BaseBroker {
       return data.data
     } catch (error) {
       logger.error("Bitget order status error", { error })
+      throw error
+    }
+  }
+
+  async getSymbolInfo(symbol: string): Promise<SymbolFilters> {
+    try {
+      const requestPath = "/api/spot/v1/public/products"
+      const response = await fetch(`${this.baseUrl}${requestPath}`)
+      const data = await response.json()
+      if (data.code !== "00000") throw new Error(`Bitget symbol error: ${data.msg}`)
+      const s = data.data.find((x: any) => x.symbol === symbol)
+      if (!s) throw new Error(`Symbol not found: ${symbol}`)
+      return {
+        symbol: s.symbol,
+        baseAsset: s.baseCoin,
+        quoteAsset: s.quoteCoin,
+        minQty: parseFloat(s.minTradeNum),
+        stepSize: parseFloat(s.quantityPrecision ? `1e-${s.quantityPrecision}` : "0.000001"),
+        tickSize: parseFloat(s.pricePrecision ? `1e-${s.pricePrecision}` : "0.000001"),
+        minNotional: parseFloat(s.minTradeAmount || "5"),
+        pricePrecision: s.pricePrecision || 6,
+        quantityPrecision: s.quantityPrecision || 6,
+      }
+    } catch (error) {
+      logger.error("Bitget getSymbolInfo error", { symbol, error })
       throw error
     }
   }
