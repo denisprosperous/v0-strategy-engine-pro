@@ -395,3 +395,36 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ by the Strategy Engine Pro Team**
 
 *Empowering traders with AI-driven insights and advanced risk management.*
+
+## 📊 Optimization & Performance
+
+Performance is a core concern in the trading engine. This project includes comprehensive profiling, benchmarking, and optimization guidelines.
+
+### Getting Started with Optimization
+
+- **Read the [Optimization Checklist](OPTIMIZATION.md)** for comprehensive performance guidelines
+- **Review [Contributing Guidelines](.github/CONTRIBUTING.md)** for optimization-focused PR process
+- **Use [Profiling Script](scripts/profile.py)** to measure performance:
+  ```bash
+  python scripts/profile.py --module trading --function main_loop --save
+  ```
+- **Run Benchmarks**:
+  ```bash
+  pytest tests/benchmarks/ -v --benchmark-disable-gc
+  ```
+
+### Key Focus Areas
+
+- **AI Models**: Batch processing, caching, model versioning
+- **Trading Loops**: Async patterns, latency optimization, order execution speed
+- **Analytics**: Vectorized operations, memoization, batch processing
+- **Risk Management**: Dynamic thresholds, efficient risk checks, logging
+
+### Performance Targets
+
+- Trading loop latency: <100ms (signal generation to order submission)
+- Analytics calculations: <500ms (for full portfolio analysis)
+- Model inference: <50ms per symbol (per LLM model)
+- Risk checks: <10ms for large portfolios
+
+---
