@@ -1,0 +1,16 @@
+# Ignore Python directories and files not needed for Vercel deployment
+exchanges/
+*.pyc
+__pycache__/
+.pytest_cache/
+.env.local
+.env.*.local
+.venv/
+venv/
+*.egg-info/
+.DS_Store
+node_modules/
+.next/
+out/
+build/
+.turbo/
