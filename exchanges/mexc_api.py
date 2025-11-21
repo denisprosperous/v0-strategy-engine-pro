@@ -231,3 +231,228 @@ class MEXCAPI(BaseExchange):
         except Exception as e:
             self.on_risk_alert(f"Failed to fetch klines for {symbol}: {str(e)}")
             return pd.DataFrame()
+
+    async def subscribe_ticker(self, symbol: str) -> None:
+        """Subscribe to real-time ticker updates for a symbol."""
+        if not self.ws:
+            await self.connect_websocket()
+        
+        channel = f"spot@public.deals.v3.api@{symbol}@100ms"
+        subscription = {
+            "method": "SUBSCRIPTION",
+            "params": {
+                "channels": [channel]
+            }
+        }
+        
+        await self.ws.send(json.dumps(subscription))
+        self.on_signal("websocket_subscribed", {"symbol": symbol, "type": "ticker"})
+
+    async def subscribe_trades(self, symbol: str) -> None:
+        """Subscribe to real-time trade stream."""
+        if not self.ws:
+            await self.connect_websocket()
+        
+        channel = f"spot@public.deals.v3.api@{symbol}@raw"
+        subscription = {
+            "method": "SUBSCRIPTION",
+            "params": {
+                "channels": [channel]
+            }
+        }
+        
+        await self.ws.send(json.dumps(subscription))
+        self.on_signal("websocket_subscribed", {"symbol": symbol, "type": "trades"})
+
+    async def subscribe_orderbook(self, symbol: str, depth: int = 20) -> None:
+        """Subscribe to real-time order book updates."""
+        if not self.ws:
+            await self.connect_websocket()
+        
+        channel = f"spot@public.depth.v3.api@{symbol}@{depth}"
+        subscription = {
+            "method": "SUBSCRIPTION",
+            "params": {
+                "channels": [channel]
+            }
+        }
+        
+        await self.ws.send(json.dumps(subscription))
+        self.on_signal("websocket_subscribed", {"symbol": symbol, "type": "orderbook", "depth": depth})
+
+    async def maintain_websocket(self) -> None:
+        """Maintain WebSocket connection and process incoming messages."""
+        try:
+            async with self.ws:
+                async for message in self.ws:
+                    try:
+                        data = json.loads(message)
+                        
+                        if data.get("method") == "PUSH":
+                            channel = data.get("params", {}).get("channel", "")
+                            push_data = data.get("data", {})
+                            
+                            if "deals" in channel:
+                                self.on_market_data("ticker", {
+                                    "symbol": push_data.get("s", ""),
+                                    "price": float(push_data.get("p", 0)),
+                                    "volume": float(push_data.get("v", 0)),
+                                    "timestamp": push_data.get("t", 0)
+                                })
+                            
+                            elif "depth" in channel:
+                                self.on_market_data("orderbook", {
+                                    "symbol": push_data.get("s", ""),
+                                    "bids": push_data.get("b", []),
+                                    "asks": push_data.get("a", []),
+                                    "timestamp": push_data.get("t", 0)
+                                })
+                    
+                    except json.JSONDecodeError:
+                        continue
+                    except Exception as e:
+                        self.on_risk_alert(f"WebSocket message error: {str(e)}")
+                        
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            self.on_risk_alert(f"WebSocket error: {str(e)}")
+            await asyncio.sleep(5)
+
+    async def get_recent_trades(self, symbol: str, limit: int = 100) -> List[Dict]:
+        """Get recent trades for a symbol."""
+        params = {
+            "symbol": symbol,
+            "limit": min(limit, 1000)
+        }
+        
+        try:
+            response = await self.request(
+                "GET",
+                f"{self.rest_url}/api/v3/trades",
+                params=params
+            )
+            
+            trades = []
+            for trade in response:
+                trades.append({
+                    "id": trade.get("id"),
+                    "symbol": symbol,
+                    "price": float(trade.get("p", 0)),
+                    "quantity": float(trade.get("v", 0)),
+                    "time": trade.get("t"),
+                    "buyer_maker": trade.get("m", False)
+                })
+            
+            return trades
+        except Exception as e:
+            self.on_risk_alert(f"Failed to get recent trades: {str(e)}")
+            return []
+
+    async def get_account_trades(self, symbol: str, start_time: Optional[int] = None,
+                                 end_time: Optional[int] = None, limit: int = 500) -> List[Dict]:
+        """Get account trade history."""
+        params = {
+            "symbol": symbol,
+            "limit": min(limit, 1000)
+        }
+        
+        if start_time:
+            params["startTime"] = start_time
+        if end_time:
+            params["endTime"] = end_time
+        
+        try:
+            response = await self.request(
+                "GET",
+                f"{self.rest_url}/api/v3/myTrades",
+                params=params,
+                signed=True
+            )
+            
+            trades = []
+            for trade in response:
+                trades.append({
+                    "id": trade.get("id"),
+                    "symbol": symbol,
+                    "price": float(trade.get("price", 0)),
+                    "quantity": float(trade.get("qty", 0)),
+                    "commission": float(trade.get("commission", 0)),
+                    "commission_asset": trade.get("commissionAsset"),
+                    "time": trade.get("time"),
+                    "is_buyer": trade.get("isBuyer", False),
+                    "is_maker": trade.get("isMaker", False)
+                })
+            
+            return trades
+        except Exception as e:
+            self.on_risk_alert(f"Failed to get account trades: {str(e)}")
+            return []
+
+    async def get_trading_rules(self, symbol: Optional[str] = None) -> Dict:
+        """Get trading rules and symbol information."""
+        try:
+            response = await self.request(
+                "GET",
+                f"{self.rest_url}/api/v3/exchangeInfo"
+            )
+            
+            rules = {
+                "timezone": response.get("timezone"),
+                "server_time": response.get("serverTime"),
+                "symbols": {}
+            }
+            
+            for sym_info in response.get("symbols", []):
+                sym = sym_info.get("symbol")
+                if symbol and sym != symbol:
+                    continue
+                
+                rules["symbols"][sym] = {
+                    "status": sym_info.get("status"),
+                    "base_asset": sym_info.get("baseAsset"),
+                    "quote_asset": sym_info.get("quoteAsset"),
+                    "base_precision": sym_info.get("baseAssetPrecision"),
+                    "quote_precision": sym_info.get("quotePrecision"),
+                    "order_types": sym_info.get("orderTypes", []),
+                    "filters": sym_info.get("filters", [])
+                }
+            
+            return rules
+        except Exception as e:
+            self.on_risk_alert(f"Failed to get trading rules: {str(e)}")
+            return {}
+
+    async def estimate_trading_fees(self, symbol: str, quantity: float, 
+                                   price: float, order_type: str = "spot") -> Dict:
+        """Estimate trading fees for an order."""
+        try:
+            response = await self.request(
+                "GET",
+                f"{self.rest_url}/api/v3/account",
+                signed=True
+            )
+            
+            maker_fee = float(response.get("makerCommission", 0)) / 10000
+            taker_fee = float(response.get("takerCommission", 0)) / 10000
+            
+            notional_value = quantity * price
+            
+            return {
+                "symbol": symbol,
+                "order_type": order_type,
+                "quantity": quantity,
+                "price": price,
+                "notional_value": notional_value,
+                "maker_fee_rate": maker_fee,
+                "taker_fee_rate": taker_fee,
+                "estimated_maker_fee": notional_value * maker_fee,
+                "estimated_taker_fee": notional_value * taker_fee
+            }
+        except Exception as e:
+            self.on_risk_alert(f"Failed to estimate fees: {str(e)}")
+            return {}
+
+    def __str__(self) -> str:
+        """String representation of MEXC exchange instance."""
+        return f"<MEXC Exchange API: {self.exchange} | Mode: {self.trading_mode}>"
