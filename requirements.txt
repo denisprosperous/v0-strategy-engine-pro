@@ -8,6 +8,11 @@ numpy>=1.24.0
 sqlalchemy>=2.0.0
 alembic>=1.11.0
 
+# Caching
+redis>=5.0.0
+aioredis>=2.0.1
+hiredis>=2.2.3
+
 # Exchange APIs
 ccxt>=4.0.0
 
