@@ -1,7 +1,7 @@
 """Exchange Connector Module - Phase 2.4
 
 Multi-exchange API integration for real-time market data and trading.
-Supports Binance, Bitget, Bybit, MEXC, OKX, and Phemex.
+Supports Binance, Bitget, Bybit, Gate.io, Huobi/HTX, Kraken, KuCoin, MEXC, OKX, and Phemex.
 
 Features:
 - Unified API interface across multiple exchanges
@@ -42,6 +42,10 @@ class ExchangeType(Enum):
     MEXC = "mexc"
     OKX = "okx"
     PHEMEX = "phemex"
+        GATEIO = "gateio"
+    HUOBI = "huobi"
+    KRAKEN = "kraken"
+    KUCOIN = "kucoin"
 
 
 class OrderSide(Enum):
@@ -293,11 +297,15 @@ class ExchangeConnectorFactory:
     
     _connectors = {
         ExchangeType.BINANCE: BinanceConnector,
-        # ExchangeType.BITGET: BitgetConnector,
-        # ExchangeType.BYBIT: BybitConnector,
-        # ExchangeType.MEXC: MexcConnector,
-        # ExchangeType.OKX: OkxConnector,
-        # ExchangeType.PHEMEX: PhemexConnector,
+    ExchangeType.BITGET: BitgetConnector,
+        ExchangeType.BYBIT: BybitConnector,
+    ExchangeType.MEXC: MexcConnector,
+        ExchangeType.OKX: OkxConnector,
+      ExchangeType.PHEMEX: PhemexConnector,
+                changeType.GATEIO: GateioConnector,
+        ExchangeType.HUOBI: HuobiConnector,
+        ExchangeType.KRAKEN: KrakenConnector,
+        ExchangeType.KUCOIN: KucoinConnector,
     }
     
     @classmethod
