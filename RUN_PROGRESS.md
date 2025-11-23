@@ -83,15 +83,7 @@ Files Created:
    - Support/resistance integration (strong, medium, weak levels)
 
 2. tests/signal_generation/test_fibonacci_engine.py (180 LOC)
-   - 6+ comprehensive unit tests:
-     * test_dynamic_level_basic: Validates ATR calculation and level generation
-     * test_signal_triggers_on_fib: Confirms Fibonacci signal when price at key level
-     * test_signal_alt_strategy_fallback: Validates alternative strategy execution
-     * test_fallback_returns_none_if_all_fail: Confirms None when no strategies trigger
-     * test_multiple_alternative_strategies: Tests ordered execution of multiple alternatives
-   - Full coverage of plug-in architecture
-   - OHLC data generator utility (gen_ohlc) for test data
-   - Validates signal routing and confidence scoring
+   - 6+ comprehensive unit tests covering plug-in architecture
 
 Commits Made:
 1. feat(signals): Add dynamic Fibonacci engine with pluggable alt strategies
@@ -108,17 +100,96 @@ Module B Progress:
 - Target: 85%
 - Remaining: 30%
 
-Next Steps: Run 5 - Multi-Condition Signal Validator (with plug-in awareness)
+Next Steps: Run 5 - Multi-Condition Signal Validator
 
 Blockers: None
 
-## OVERALL PROGRESS AFTER RUN 4
+## Run 5 Summary - COMPLETE
+
+Segment: Multi-Condition Signal Validator
+
+Files Created:
+1. signal_generation/signal_validator.py (370 LOC)
+   - SignalValidator class with 7-condition validation system:
+     * Condition 1: Price level validation (strategy-specific logic)
+       - Fibonacci: ±1% tolerance from triggered level
+       - Mean reversion: accepts by default
+       - Unknown strategies: accepts with warning
+     * Condition 2: RSI confirmation
+       - Long: RSI 20-40 (oversold zone)
+       - Short: RSI 60-80 (overbought zone)
+     * Condition 3: EMA alignment (trend direction)
+       - Long: price > EMA20 > EMA50 (uptrend)
+       - Short: price < EMA20 < EMA50 (downtrend)
+     * Condition 4: Volume confirmation (>150% of average)
+     * Condition 5: Market structure
+       - Fibonacci: needs high volatility (ATR/price >= 1%)
+       - Mean reversion: needs low volatility (ATR/price < 2%)
+     * Condition 6: Position sizing (max 5% per position)
+     * Condition 7: Portfolio correlation (<0.7)
+   
+   - SignalValidationResult dataclass:
+     * is_valid: bool (true if confidence >= 60%)
+     * confidence: float (0-100 score based on conditions passed)
+     * violations: List[str] (detailed failure messages)
+     * condition_results: Dict[str, bool] (per-condition pass/fail)
+     * metadata: Dict (tracking RSI, EMA, volume ratio, ATR, etc.)
+   
+   - Strategy-agnostic validation:
+     * Works with Fibonacci, mean reversion, and any future strategies
+     * Adapts validation logic based on strategy type
+     * Confidence scoring: (passed_conditions / total_conditions) * 100
+     * Execution threshold: Valid if confidence >= 60% (5 of 7 pass)
+   
+   - Configurable thresholds:
+     * All 7 condition parameters customizable at initialization
+     * Default values aligned with industry best practices
+     * Easy to tune for different risk profiles
+
+2. tests/signal_generation/test_signal_validator.py (440 LOC)
+   - 23 comprehensive unit tests:
+     * Test 1: All conditions pass (100% confidence)
+     * Test 2-3: Price level validation (Fibonacci and other strategies)
+     * Test 4-6: RSI confirmation (long/short scenarios)
+     * Test 7-8: EMA alignment (long/short scenarios)
+     * Test 9-10: Volume confirmation
+     * Test 11-12: Market structure (Fibonacci vs mean reversion)
+     * Test 13-14: Position sizing limits
+     * Test 15-16: Portfolio correlation checks
+     * Test 17-18: Confidence scoring (partial pass and below threshold)
+     * Test 19-21: Unknown strategies, mean reversion, no portfolio state
+     * Test 22-23: Custom thresholds, metadata tracking, edge cases
+   - Full coverage of all 7 validation conditions
+   - Tests both pass and fail scenarios for each condition
+   - Validates confidence scoring algorithm
+   - Tests integration with Fibonacci engine output
+
+Commits Made:
+1. feat(signals): Add multi-condition signal validator with 7 checks
+2. test(signals): Add comprehensive signal validator tests
+
+Tests Added: 23 tests
+
+Status: Complete
+
+Module B Progress:
+- Previous: 55%
+- Added: +12%
+- Current: 67%
+- Target: 85%
+- Remaining: 18%
+
+Next Steps: Run 6 - Smart Scheduler & Fail-Safe Logic
+
+Blockers: None
+
+## OVERALL PROGRESS AFTER RUN 5
 
 Data Layer: 65% (target 70%) - 5% remaining
-Fibonacci Strategy: 55% (target 85%) - 30% remaining
-Total Commits: 13 of 20
-Total LOC: 2210 (production) + 1970 (tests) + 380 (Fibonacci) = 4,560
-Total Tests: 85+ (validation) + 6+ (Fibonacci) = 91+
+Fibonacci Strategy: 67% (target 85%) - 18% remaining
+Total Commits: 16 of 20
+Total LOC: 2210 (data) + 1970 (tests) + 380 (Fibonacci) + 370 (validator) + 440 (tests) = 5,370
+Total Tests: 85+ (data) + 6+ (Fibonacci) + 23 (validator) = 114+
 
 Data Layer Completion Status:
 [=============================-----] 65%
@@ -128,24 +199,27 @@ Data Layer Completion Status:
 ⏳ Backfill mechanism (5%) - deferred to Run #8
 
 Fibonacci Strategy Status:
-[==========================--------] 55%
+[===============================---] 67%
 ✅ Fibonacci engine (15%) - COMPLETE
-⏳ Signal validator (12%) - NEXT
-⏳ Smart scheduler (8%)
+✅ Signal validator (12%) - COMPLETE
+⏳ Smart scheduler (8%) - NEXT
 ⏳ Signal scoring (5%)
 ⏳ Execution integration (5%)
 
-Key Run 4 Achievements:
-- Production-ready Fibonacci engine with volatility adjustment
-- Pluggable strategy architecture for combining multiple signal sources
-- Mean reversion example strategy included
-- Comprehensive test coverage with 6+ scenarios
-- Ready for integration with signal validator (Run 5)
+Key Run 5 Achievements:
+- Production-ready 7-condition signal validator
+- Strategy-agnostic validation (works with any strategy)
+- Confidence scoring with 60% execution threshold
+- Comprehensive test coverage with 23 scenarios
+- Detailed violation tracking and metadata
+- Configurable thresholds for all conditions
+- Ready for integration with smart scheduler (Run 6)
 
-Strategy Architecture:
-- Primary: Dynamic Fibonacci with ATR volatility adjustment
-- Fallback: Pluggable alternative strategies (mean reversion, etc.)
-- Execution: Ordered strategy evaluation with confidence scoring
-- Extensibility: Easy to add new strategies via register_alternative_strategy()
+Validation Architecture:
+- 7 comprehensive conditions covering price, momentum, trend, volume, structure, risk
+- Strategy-aware validation (different logic for Fibonacci vs mean reversion)
+- Confidence-based execution (>=75: full size, 60-74: reduced, <60: skip)
+- Detailed violation tracking for post-trade analysis
+- Metadata collection for all market indicators
 
-Last Updated: November 23, 2025 - Run 4 Complete
+Last Updated: November 23, 2025 - Run 5 Complete
