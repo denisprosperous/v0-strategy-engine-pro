@@ -519,3 +519,424 @@ class TradingModeManager:
 # - Configuration management
 # - Example usage and testing
 # - Integration documentation      
+
+# ========== SEGMENT 2 START ==========
+# Lines: ~250-300
+#
+# SEGMENT 2 includes:
+# - Telegram alert formatting methods
+# - Web dashboard integration helpers  
+# - Configuration management
+# - Production usage examples
+# - Integration documentation
+
+
+    # ==========================================
+    # Telegram Alert Formatting Methods
+    # ==========================================
+
+    async def _send_mode_notification(self, old_mode: TradingMode, new_mode: TradingMode) -> None:
+        """Send mode change notification to Telegram."""
+        try:
+            message = (
+                f"🔄 *Trading Mode Changed*\n\n"
+                f"Previous: `{old_mode.value}`\n"
+                f"Current: `{new_mode.value}`\n\n"
+            )
+            
+            if new_mode == TradingMode.MANUAL:
+                message += (
+                    "📱 *Manual Mode Active*\n"
+                    "• All signals require manual execution\n"
+                    "• Use `/trade` command or web dashboard\n"
+                    "• No automatic execution\n"
+                )
+            elif new_mode == TradingMode.SEMI_AUTO:
+                message += (
+                    "⚡ *Semi-Auto Mode Active*\n"
+                    "• Signals sent for confirmation\n"
+                    f"• {self.config.confirmation_timeout_seconds}s confirmation window\n"
+                    "• Reply with percentage to execute\n"
+                )
+            else:  # FULL_AUTO
+                message += (
+                    "🤖 *Full-Auto Mode Active*\n"
+                    "• Automatic execution enabled\n"
+                    "• Signals execute immediately\n"
+                    "• Monitor closely\n"
+                )
+            
+            await self.alert_manager.send_alert(
+                message=message,
+                alert_type="MODE_CHANGE",
+                priority="high"
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send mode notification: {e}")
+
+    async def _send_confirmation_alert(self, signal: PendingSignal) -> None:
+        """Send signal confirmation request to Telegram."""
+        try:
+            sig = signal.signal
+            message = (
+                f"⚠️ *Trade Confirmation Required*\n\n"
+                f"Symbol: `{sig.symbol}`\n"
+                f"Action: `{sig.action}`\n"
+                f"Strategy: `{sig.strategy_name}`\n"
+                f"Confidence: `{sig.confidence:.1%}`\n\n"
+                f"💰 *Position Details:*\n"
+                f"Entry: `${sig.entry_price:.4f}`\n"
+                f"Size: `{sig.position_size_usd:,.2f} USD`\n\n"
+                f"⏱️ Expires in: `{self.config.confirmation_timeout_seconds}s`\n\n"
+                f"*Reply with percentage (0-100) to execute*\n"
+                f"Example: `50` for 50% position size"
+            )
+            
+            await self.alert_manager.send_alert(
+                message=message,
+                alert_type="TRADE_CONFIRMATION",
+                priority="high",
+                metadata={"trade_id": signal.trade_id, "symbol": sig.symbol}
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send confirmation alert: {e}")
+
+    async def _send_execution_confirmation(self, trade_id: str, symbol: str, 
+                                          action: str, percentage: float) -> None:
+        """Send trade execution confirmation to Telegram."""
+        try:
+            message = (
+                f"✅ *Trade Executed*\n\n"
+                f"ID: `{trade_id}`\n"
+                f"Symbol: `{symbol}`\n"
+                f"Action: `{action}`\n"
+                f"Size: `{percentage:.0f}%`\n\n"
+                f"Check dashboard for full details"
+            )
+            
+            await self.alert_manager.send_alert(
+                message=message,
+                alert_type="TRADE_EXECUTED",
+                priority="high"
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send execution confirmation: {e}")
+
+    async def _send_manual_trade_confirmation(self, trade_request: ManualTradeRequest) -> None:
+        """Send manual trade execution confirmation to Telegram."""
+        try:
+            source_icon = "📱" if trade_request.source == TradeSource.TELEGRAM else "🌐"
+            message = (
+                f"{source_icon} *Manual Trade Submitted*\n\n"
+                f"Symbol: `{trade_request.symbol}`\n"
+                f"Action: `{trade_request.action}`\n"
+                f"Entry: `${trade_request.entry_price:.4f}`\n"
+                f"Size: `${trade_request.position_size_usd:,.2f}`\n"
+                f"Source: `{trade_request.source.value}`\n\n"
+                f"⏳ Executing..."
+            )
+            
+            await self.alert_manager.send_alert(
+                message=message,
+                alert_type="MANUAL_TRADE",
+                priority="medium"
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send manual trade confirmation: {e}")
+
+    async def _send_trade_error(self, error_msg: str, trade_id: str = None) -> None:
+        """Send trade error notification to Telegram."""
+        try:
+            message = f"❌ *Trade Error*\n\n"
+            if trade_id:
+                message += f"Trade ID: `{trade_id}`\n"
+            message += f"Error: {error_msg}"
+            
+            await self.alert_manager.send_alert(
+                message=message,
+                alert_type="TRADE_ERROR",
+                priority="high"
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send trade error alert: {e}")
+
+    async def _send_expiration_notification(self, trade_id: str, symbol: str) -> None:
+        """Send signal expiration notification to Telegram."""
+        try:
+            message = (
+                f"⌛ *Signal Expired*\n\n"
+                f"Trade ID: `{trade_id}`\n"
+                f"Symbol: `{symbol}`\n\n"
+                f"No confirmation received within timeout period"
+            )
+            
+            await self.alert_manager.send_alert(
+                message=message,
+                alert_type="SIGNAL_EXPIRED",
+                priority="low"
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to send expiration notification: {e}")
+
+
+    # ==========================================
+    # Web Dashboard Integration Helpers
+    # ==========================================
+
+    def get_dashboard_status(self) -> Dict[str, Any]:
+        """Get comprehensive status for web dashboard."""
+        return {
+            'current_mode': self.current_mode.value,
+            'is_running': self.is_running,
+            'stats': self.get_stats(),
+            'mode_history': [
+                {'mode': m.value, 'timestamp': t.isoformat()}
+                for m, t in self.mode_history
+            ],
+            'pending_signals_count': len(self.pending_signals),
+            'manual_queue_count': len(self.manual_trade_queue)
+        }
+
+    async def handle_dashboard_trade(self, trade_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle manual trade request from web dashboard.
+        
+        Args:
+            trade_data: Dictionary with keys: symbol, action, entry_price, 
+                       position_size_usd, stop_loss, take_profit
+        
+        Returns:
+            Dict with success status and message
+        """
+        try:
+            trade_request = ManualTradeRequest(
+                symbol=trade_data['symbol'],
+                action=trade_data['action'],
+                entry_price=trade_data['entry_price'],
+                position_size_usd=trade_data['position_size_usd'],
+                stop_loss=trade_data.get('stop_loss'),
+                take_profit=trade_data.get('take_profit'),
+                source=TradeSource.WEB_DASHBOARD,
+                metadata=trade_data.get('metadata', {})
+            )
+            
+            await self.execute_manual_trade(trade_request)
+            
+            return {
+                'success': True,
+                'message': f'Trade submitted for {trade_data["symbol"]}',
+                'trade_id': trade_request.trade_id
+            }
+            
+        except Exception as e:
+            logger.error(f"Dashboard trade error: {e}")
+            return {
+                'success': False,
+                'message': str(e)
+            }
+
+
+# ==========================================
+# Production Usage Examples
+# ==========================================
+
+"""
+EXAMPLE 1: Basic Initialization with Signal Integration
+
+from trading_mode_manager import TradingModeManager, TradingModeConfig, TradingMode
+from signal_generation.execution_engine_integrated import ExecutionEngine
+from telegram_integration.alert_manager import AlertManager
+
+# Initialize dependencies
+execution_engine = ExecutionEngine()
+alert_manager = AlertManager()
+
+# Configure trading mode manager
+config = TradingModeConfig(
+    default_mode=TradingMode.SEMI_AUTO,
+    confirmation_timeout_seconds=60,
+    max_pending_signals=10
+)
+
+# Create manager
+mode_manager = TradingModeManager(
+    execution_engine=execution_engine,
+    alert_manager=alert_manager,
+    config=config
+)
+
+# Start manager
+await mode_manager.start()
+
+# Process incoming signal from strategy
+signal = await strategy.generate_signal()  # Your signal generation
+if signal:
+    await mode_manager.process_signal(signal)
+
+# Stop when done
+await mode_manager.stop()
+"""
+
+"""
+EXAMPLE 2: Mode Switching During Runtime
+
+# Start in manual mode for testing
+await mode_manager.set_mode(TradingMode.MANUAL)
+
+# Manually execute specific trades via Telegram
+# User sends /trade command through Telegram bot
+# TradingModeManager.execute_manual_trade() is called
+
+# Switch to semi-auto for confirmation-based trading
+await mode_manager.set_mode(TradingMode.SEMI_AUTO)
+
+# Signals now require user confirmation
+# User replies with percentage (0-100) to execute
+
+# Once confident, enable full automation
+await mode_manager.set_mode(TradingMode.FULL_AUTO)
+"""
+
+"""
+EXAMPLE 3: Telegram Bot Integration
+
+from telegram import Update
+from telegram.ext import ContextTypes
+
+async def handle_trade_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    \"\"\"Handle /trade command from Telegram.\"\"\"
+    # Parse trade parameters from command
+    # Example: /trade BTCUSDT buy 50000 1000
+    try:
+        args = context.args
+        symbol = args[0]
+        action = args[1]
+        entry_price = float(args[2])
+        position_size = float(args[3])
+        
+        trade_request = ManualTradeRequest(
+            symbol=symbol,
+            action=action,
+            entry_price=entry_price,
+            position_size_usd=position_size,
+            source=TradeSource.TELEGRAM,
+            metadata={'user_id': update.effective_user.id}
+        )
+        
+        await mode_manager.execute_manual_trade(trade_request)
+        await update.message.reply_text('✅ Trade submitted!')
+        
+    except Exception as e:
+        await update.message.reply_text(f'❌ Error: {e}')
+
+
+async def handle_confirmation_reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    \"\"\"Handle user confirmation percentage reply.\"\"\"
+    try:
+        # Get most recent pending signal
+        text = update.message.text.strip()
+        percentage = float(text)
+        
+        if 0 <= percentage <= 100:
+            # Get the most recent pending signal (you'd track this in context)
+            trade_id = context.user_data.get('last_pending_signal_id')
+            if trade_id:
+                await mode_manager.handle_user_confirmation(trade_id, percentage)
+                await update.message.reply_text(f'✅ Executing at {percentage}%')
+            else:
+                await update.message.reply_text('❌ No pending signal found')
+        else:
+            await update.message.reply_text('❌ Invalid percentage (0-100)')
+            
+    except ValueError:
+        pass  # Not a percentage reply, ignore
+    except Exception as e:
+        await update.message.reply_text(f'❌ Error: {e}')
+"""
+
+"""
+EXAMPLE 4: Web Dashboard API Endpoint (FastAPI)
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class DashboardTradeRequest(BaseModel):
+    symbol: str
+    action: str
+    entry_price: float
+    position_size_usd: float
+    stop_loss: float = None
+    take_profit: float = None
+
+@app.post("/api/trade/manual")
+async def submit_manual_trade(trade: DashboardTradeRequest):
+    \"\"\"Submit manual trade from web dashboard.\"\"\"
+    result = await mode_manager.handle_dashboard_trade(trade.dict())
+    
+    if result['success']:
+        return result
+    else:
+        raise HTTPException(status_code=400, detail=result['message'])
+
+@app.get("/api/status")
+async def get_status():
+    \"\"\"Get trading mode manager status.\"\"\"
+    return mode_manager.get_dashboard_status()
+"""
+
+
+# ==========================================
+# Integration Documentation
+# ==========================================
+
+"""
+INTEGRATION CHECKLIST:
+
+1. Signal Generation Integration:
+   - Import TradingModeManager in your main execution loop
+   - Call mode_manager.process_signal() for each generated signal
+   - Ensure signals have all required fields (symbol, action, confidence, etc.)
+
+2. Telegram Bot Setup:
+   - Implement /trade command handler for manual trades
+   - Implement message handler for confirmation replies (percentage)
+   - Store pending signal IDs in user context for confirmation tracking
+   - Pass TradeSource.TELEGRAM when creating ManualTradeRequest
+
+3. Web Dashboard Setup (Optional):
+   - Create FastAPI endpoints for manual trade submission
+   - Use mode_manager.handle_dashboard_trade() for trade processing
+   - Use mode_manager.get_dashboard_status() for status display
+   - Pass TradeSource.WEB_DASHBOARD when creating trades
+
+4. Mode Configuration:
+   - Start with MANUAL mode for testing
+   - Move to SEMI_AUTO for confirmation-based trading
+   - Enable FULL_AUTO only after thorough testing
+   - Adjust confirmation_timeout_seconds based on your needs
+
+5. Error Handling:
+   - Monitor logs for execution errors
+   - Check alert_manager for Telegram notifications
+   - Handle expired signals appropriately
+   - Track statistics with get_stats()
+
+6. Production Deployment:
+   - Ensure execution_engine is properly initialized
+   - Verify alert_manager Telegram credentials
+   - Set appropriate confirmation timeouts
+   - Monitor manual_trade_queue size
+   - Regularly check mode_history for unexpected switches
+"""
+
+
+# ========== SEGMENT 2 END ==========
+# Total lines: ~770-780
+# File complete with all methods and documentation
