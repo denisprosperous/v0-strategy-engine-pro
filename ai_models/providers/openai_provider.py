@@ -1,6 +1,6 @@
 """
 OpenAI GPT Provider Wrapper
-Implements caching, rate limiting, fallback, and structured analysis
+Implements caching, rate limiting, fallback, and structured analysis with exponential backoff
 """
 import openai
 import asyncio
@@ -8,7 +8,7 @@ import time
 import json
 import hashlib
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 import logging
 from functools import wraps
 from collections import defaultdict
@@ -28,7 +28,7 @@ class AIResponse:
     cost: float = 0.0
     latency_ms: float = 0.0
     cached: bool = False
-    metadata: Dict[str, Any] = None
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self):
         return asdict(self)
@@ -95,38 +95,60 @@ class OpenAIProvider:
     """OpenAI GPT provider with advanced features"""
     
     MODELS = {
+        # GPT-4 Series (most capable)
+        "gpt-4o": {"max_tokens": 128000, "cost_per_1k_input": 0.0025, "cost_per_1k_output": 0.01},
+        "gpt-4o-mini": {"max_tokens": 128000, "cost_per_1k_input": 0.00015, "cost_per_1k_output": 0.0006},
         "gpt-4-turbo": {"max_tokens": 128000, "cost_per_1k_input": 0.01, "cost_per_1k_output": 0.03},
         "gpt-4": {"max_tokens": 8192, "cost_per_1k_input": 0.03, "cost_per_1k_output": 0.06},
+        
+        # GPT-3.5 Series (fast & economical)
         "gpt-3.5-turbo": {"max_tokens": 16385, "cost_per_1k_input": 0.0005, "cost_per_1k_output": 0.0015},
+        "gpt-3.5-turbo-16k": {"max_tokens": 16385, "cost_per_1k_input": 0.001, "cost_per_1k_output": 0.002},
+        
+        # O1 Series (advanced reasoning)
+        "o1-preview": {"max_tokens": 128000, "cost_per_1k_input": 0.015, "cost_per_1k_output": 0.06},
+        "o1-mini": {"max_tokens": 128000, "cost_per_1k_input": 0.003, "cost_per_1k_output": 0.012},
     }
     
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-4-turbo",
-        max_retries: int = 3,
+        model: str = "gpt-4o",
+        max_retries: int = 5,
         cache_ttl: int = 300,
-        rate_limit_rpm: int = 60
+        rate_limit_rpm: int = 60,
+        base_backoff: float = 1.0,
+        max_backoff: float = 60.0
     ):
         self.api_key = api_key
         self.model = model
         self.max_retries = max_retries
+        self.base_backoff = base_backoff
+        self.max_backoff = max_backoff
         self.client = openai.AsyncOpenAI(api_key=api_key)
         self.cache = ResponseCache(ttl_seconds=cache_ttl)
         self.rate_limiter = RateLimiter(calls_per_minute=rate_limit_rpm)
         self.stats = defaultdict(int)
         
         if model not in self.MODELS:
-            raise ValueError(f"Unknown model: {model}. Available: {list(self.MODELS.keys())}")
+            logger.warning(f"Unknown model: {model}. Using default gpt-4o")
+            self.model = "gpt-4o"
     
     def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
         """Calculate API cost based on token usage"""
-        model_config = self.MODELS[self.model]
+        model_config = self.MODELS.get(self.model, self.MODELS["gpt-4o"])
         cost = (
             (input_tokens / 1000) * model_config["cost_per_1k_input"] +
             (output_tokens / 1000) * model_config["cost_per_1k_output"]
         )
         return round(cost, 6)
+    
+    def _calculate_backoff(self, attempt: int) -> float:
+        """Calculate exponential backoff with jitter"""
+        import random
+        backoff = min(self.base_backoff * (2 ** attempt), self.max_backoff)
+        jitter = random.uniform(0, 0.1 * backoff)
+        return backoff + jitter
     
     async def _make_request(
         self,
@@ -135,7 +157,7 @@ class OpenAIProvider:
         max_tokens: int = 800,
         system_message: Optional[str] = None
     ) -> AIResponse:
-        """Make API request with retries and error handling"""
+        """Make API request with retries and exponential backoff"""
         
         # Check cache first
         cached_response = self.cache.get(prompt, self.model)
@@ -151,6 +173,7 @@ class OpenAIProvider:
             messages.append({"role": "system", "content": system_message})
         messages.append({"role": "user", "content": prompt})
         
+        last_exception = None
         for attempt in range(self.max_retries):
             try:
                 start_time = time.time()
@@ -181,7 +204,8 @@ class OpenAIProvider:
                     metadata={
                         "input_tokens": input_tokens,
                         "output_tokens": output_tokens,
-                        "finish_reason": response.choices[0].finish_reason
+                        "finish_reason": response.choices[0].finish_reason,
+                        "attempt": attempt + 1
                     }
                 )
                 
@@ -194,21 +218,36 @@ class OpenAIProvider:
                 return ai_response
                 
             except openai.RateLimitError as e:
-                wait_time = 2 ** attempt
-                logger.warning(f"Rate limit hit, waiting {wait_time}s (attempt {attempt + 1}/{self.max_retries})")
-                await asyncio.sleep(wait_time)
+                last_exception = e
+                wait_time = self._calculate_backoff(attempt)
+                logger.warning(f"Rate limit hit, waiting {wait_time:.2f}s (attempt {attempt + 1}/{self.max_retries})")
+                self.stats["rate_limit_errors"] += 1
+                if attempt < self.max_retries - 1:
+                    await asyncio.sleep(wait_time)
             except openai.APIError as e:
+                last_exception = e
                 logger.error(f"OpenAI API error: {e} (attempt {attempt + 1}/{self.max_retries})")
-                if attempt == self.max_retries - 1:
-                    raise
-                await asyncio.sleep(1)
+                self.stats["api_errors"] += 1
+                if attempt < self.max_retries - 1:
+                    wait_time = self._calculate_backoff(attempt)
+                    await asyncio.sleep(wait_time)
+            except openai.APIConnectionError as e:
+                last_exception = e
+                logger.error(f"Connection error: {e} (attempt {attempt + 1}/{self.max_retries})")
+                self.stats["connection_errors"] += 1
+                if attempt < self.max_retries - 1:
+                    wait_time = self._calculate_backoff(attempt)
+                    await asyncio.sleep(wait_time)
             except Exception as e:
-                logger.error(f"Unexpected error: {e}")
-                if attempt == self.max_retries - 1:
-                    raise
-                await asyncio.sleep(1)
+                last_exception = e
+                logger.error(f"Unexpected error: {e} (attempt {attempt + 1}/{self.max_retries})")
+                self.stats["unknown_errors"] += 1
+                if attempt < self.max_retries - 1:
+                    wait_time = self._calculate_backoff(attempt)
+                    await asyncio.sleep(wait_time)
         
-        raise Exception(f"Failed after {self.max_retries} retries")
+        self.stats["failed_requests"] += 1
+        raise Exception(f"Failed after {self.max_retries} retries. Last error: {last_exception}")
     
     async def analyze_sentiment(self, text: str, market_context: Optional[Dict] = None) -> AIResponse:
         """Analyze sentiment of text for trading decisions"""
