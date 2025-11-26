@@ -1,0 +1,14 @@
+# Telegram Bot Requirements
+# Install with: pip install -r telegram_integration/requirements.txt
+
+# Core Telegram Bot API
+python-telegram-bot==20.7
+
+# Async HTTP client for API communication
+aiohttp==3.9.1
+
+# Already in main requirements, but listed for completeness
+# fastapi
+# uvicorn
+# pyjwt
+# python-dotenv
