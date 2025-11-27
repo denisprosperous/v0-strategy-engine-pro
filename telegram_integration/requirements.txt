@@ -1,0 +1,11 @@
+# Telegram Bot Dependencies
+# Install with: pip install -r telegram_integration/requirements.txt
+
+# Telegram Bot Framework
+python-telegram-bot==20.7
+
+# Async HTTP Client
+aiohttp==3.9.1
+
+# Additional utilities
+python-dotenv==1.0.0
