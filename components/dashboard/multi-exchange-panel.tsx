@@ -506,3 +506,5 @@ export default function MultiExchangePanel() {
     </div>
   )
 }
+
+export { MultiExchangePanel }

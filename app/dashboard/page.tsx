@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,7 +15,10 @@ import { StrategyManager } from "@/components/dashboard/strategy-manager"
 import { MarketData } from "@/components/dashboard/market-data"
 import { RiskManagement } from "@/components/dashboard/risk-management"
 import { AdminPanel } from "@/components/dashboard/admin-panel"
-import { TrendingUp, Activity, DollarSign, Target, RefreshCw, AlertCircle } from "lucide-react"
+import { LiveTradingPanel } from "@/components/dashboard/live-trading-panel"
+import { BacktestingPanel } from "@/components/dashboard/backtesting-panel"
+import { MultiExchangePanel } from "@/components/dashboard/multi-exchange-panel"
+import { TrendingUp, Activity, DollarSign, Target, RefreshCw, AlertCircle, Bot, Zap, Globe } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface PortfolioData {
@@ -26,14 +30,21 @@ interface PortfolioData {
   activeStrategies: number
 }
 
+interface BotStatus {
+  configured: boolean
+  webhookSet: boolean
+  botUsername?: string
+}
+
 export default function DashboardPage() {
   const { user, loading } = useAuth()
   const { toast } = useToast()
-  const [activeTab, setActiveTab] = useState("overview")
+  const searchParams = useSearchParams()
+  const tabFromUrl = searchParams.get("tab")
+  const [activeTab, setActiveTab] = useState(tabFromUrl || "overview")
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
   const [portfolioData, setPortfolioData] = useState<PortfolioData>({
     totalValue: 0,
     totalPnL: 0,
@@ -42,6 +53,16 @@ export default function DashboardPage() {
     winRate: 0,
     activeStrategies: 0,
   })
+  const [botStatus, setBotStatus] = useState<BotStatus>({ configured: false, webhookSet: false })
+
+  useEffect(() => {
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl)
+    }
+    fetchDashboardData()
+    const interval = setInterval(fetchDashboardData, 30000)
+    return () => clearInterval(interval)
+  }, [tabFromUrl])
 
   const fetchDashboardData = async () => {
     try {
@@ -85,16 +106,6 @@ export default function DashboardPage() {
     }
   }
 
-  useEffect(() => {
-    if (user) {
-      fetchDashboardData()
-
-      // Poll for updates every 30 seconds
-      const interval = setInterval(fetchDashboardData, 30000)
-      return () => clearInterval(interval)
-    }
-  }, [user])
-
   const handleRefresh = () => {
     fetchDashboardData()
     toast({
@@ -111,19 +122,6 @@ export default function DashboardPage() {
     )
   }
 
-  if (!user) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Card className="w-96">
-          <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
-            <CardDescription>Please log in to access the dashboard.</CardDescription>
-          </CardHeader>
-        </Card>
-      </div>
-    )
-  }
-
   return (
     <div className="flex h-screen bg-background">
       <DashboardSidebar activeTab={activeTab} onTabChange={setActiveTab} />
@@ -134,7 +132,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight">Trading Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, {user.username}</p>
+              <p className="text-muted-foreground">Welcome back{user ? `, ${user.username}` : ""}</p>
             </div>
             <div className="flex items-center space-x-2">
               {error && (
@@ -150,9 +148,6 @@ export default function DashboardPage() {
               <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
                 <RefreshCw className={`w-4 h-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`} />
                 Refresh
-              </Button>
-              <Button variant="outline" size="sm">
-                Settings
               </Button>
             </div>
           </div>
@@ -242,13 +237,44 @@ export default function DashboardPage() {
 
           {/* Main Content Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-6">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="trades">Trades</TabsTrigger>
-              <TabsTrigger value="strategies">Strategies</TabsTrigger>
-              <TabsTrigger value="market">Market</TabsTrigger>
-              <TabsTrigger value="risk">Risk</TabsTrigger>
-              {user.role === "admin" && <TabsTrigger value="admin">Admin</TabsTrigger>}
+            <TabsList className="flex flex-wrap h-auto gap-1">
+              <TabsTrigger value="overview" className="gap-1">
+                <Activity className="w-4 h-4" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="trades" className="gap-1">
+                <TrendingUp className="w-4 h-4" />
+                Trades
+              </TabsTrigger>
+              <TabsTrigger value="strategies" className="gap-1">
+                <Target className="w-4 h-4" />
+                Strategies
+              </TabsTrigger>
+              <TabsTrigger value="live" className="gap-1">
+                <Zap className="w-4 h-4" />
+                Live Trading
+              </TabsTrigger>
+              <TabsTrigger value="backtest" className="gap-1">
+                <Activity className="w-4 h-4" />
+                Backtest
+              </TabsTrigger>
+              <TabsTrigger value="exchanges" className="gap-1">
+                <Globe className="w-4 h-4" />
+                Exchanges
+              </TabsTrigger>
+              <TabsTrigger value="market" className="gap-1">
+                <DollarSign className="w-4 h-4" />
+                Market
+              </TabsTrigger>
+              <TabsTrigger value="risk" className="gap-1">
+                <AlertCircle className="w-4 h-4" />
+                Risk
+              </TabsTrigger>
+              <TabsTrigger value="telegram" className="gap-1">
+                <Bot className="w-4 h-4" />
+                Telegram
+              </TabsTrigger>
+              {user?.role === "admin" && <TabsTrigger value="admin">Admin</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4">
@@ -263,6 +289,18 @@ export default function DashboardPage() {
               <StrategyManager />
             </TabsContent>
 
+            <TabsContent value="live" className="space-y-4">
+              <LiveTradingPanel />
+            </TabsContent>
+
+            <TabsContent value="backtest" className="space-y-4">
+              <BacktestingPanel />
+            </TabsContent>
+
+            <TabsContent value="exchanges" className="space-y-4">
+              <MultiExchangePanel />
+            </TabsContent>
+
             <TabsContent value="market" className="space-y-4">
               <MarketData />
             </TabsContent>
@@ -271,7 +309,11 @@ export default function DashboardPage() {
               <RiskManagement />
             </TabsContent>
 
-            {user.role === "admin" && (
+            <TabsContent value="telegram" className="space-y-4">
+              <TelegramBotPanel botStatus={botStatus} />
+            </TabsContent>
+
+            {user?.role === "admin" && (
               <TabsContent value="admin" className="space-y-4">
                 <AdminPanel />
               </TabsContent>
@@ -279,6 +321,123 @@ export default function DashboardPage() {
           </Tabs>
         </div>
       </main>
+    </div>
+  )
+}
+
+function TelegramBotPanel({ botStatus }: { botStatus: BotStatus }) {
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(false)
+
+  const setupWebhook = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/telegram/setup", { method: "POST" })
+      const data = await response.json()
+      if (data.success) {
+        toast({ title: "Success", description: "Telegram webhook configured" })
+      } else {
+        toast({ title: "Error", description: data.error, variant: "destructive" })
+      }
+    } catch {
+      toast({ title: "Error", description: "Failed to setup webhook", variant: "destructive" })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="w-5 h-5" />
+            Telegram Bot Status
+          </CardTitle>
+          <CardDescription>Control your trading bot via Telegram</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+              <span className="text-sm font-medium">Bot Token</span>
+              <Badge variant={botStatus.configured ? "default" : "secondary"}>
+                {botStatus.configured ? "Configured" : "Not Set"}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
+              <span className="text-sm font-medium">Webhook</span>
+              <Badge variant={botStatus.webhookSet ? "default" : "secondary"}>
+                {botStatus.webhookSet ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+          </div>
+
+          {botStatus.botUsername && (
+            <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+              <p className="text-sm">
+                Bot Username: <strong>@{botStatus.botUsername}</strong>
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Search for this bot on Telegram to start using it</p>
+            </div>
+          )}
+
+          {!botStatus.configured && (
+            <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+              <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Telegram Bot Token Required</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add TELEGRAM_BOT_TOKEN to your environment variables to enable the Telegram bot. Get a token from
+                @BotFather on Telegram.
+              </p>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Button onClick={setupWebhook} disabled={!botStatus.configured}>
+              Setup Webhook
+            </Button>
+            <Button variant="outline" onClick={() => {}}>
+              Refresh Status
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Available Commands</CardTitle>
+          <CardDescription>Commands you can use with the Telegram bot</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-2">
+            {[
+              { cmd: "/start", desc: "Initialize bot and show welcome message" },
+              { cmd: "/status", desc: "View current portfolio and trading status" },
+              { cmd: "/balance", desc: "Check account balance across exchanges" },
+              { cmd: "/trades", desc: "View recent and open trades" },
+              { cmd: "/strategies", desc: "List and manage trading strategies" },
+              { cmd: "/market", desc: "Get current market prices" },
+              { cmd: "/exchanges", desc: "Check exchange connection status" },
+              { cmd: "/alert", desc: "Set price alerts" },
+              { cmd: "/help", desc: "Show all available commands" },
+            ].map(({ cmd, desc }) => (
+              <div key={cmd} className="flex items-center justify-between py-2 border-b last:border-0">
+                <code className="text-sm font-mono bg-muted px-2 py-1 rounded">{cmd}</code>
+                <span className="text-sm text-muted-foreground">{desc}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
