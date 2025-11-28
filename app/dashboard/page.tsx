@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,19 +14,94 @@ import { StrategyManager } from "@/components/dashboard/strategy-manager"
 import { MarketData } from "@/components/dashboard/market-data"
 import { RiskManagement } from "@/components/dashboard/risk-management"
 import { AdminPanel } from "@/components/dashboard/admin-panel"
-import { TrendingUp, Activity, DollarSign, Target } from "lucide-react"
+import { TrendingUp, Activity, DollarSign, Target, RefreshCw, AlertCircle } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
+
+interface PortfolioData {
+  totalValue: number
+  totalPnL: number
+  pnlPercentage: number
+  openTrades: number
+  winRate: number
+  activeStrategies: number
+}
 
 export default function DashboardPage() {
   const { user, loading } = useAuth()
+  const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("overview")
-  const [portfolioData, setPortfolioData] = useState({
-    totalValue: 12450.67,
-    totalPnL: 2450.67,
-    pnlPercentage: 24.5,
-    openTrades: 5,
-    winRate: 78.5,
-    activeStrategies: 3,
+  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [dataLoading, setDataLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const [portfolioData, setPortfolioData] = useState<PortfolioData>({
+    totalValue: 0,
+    totalPnL: 0,
+    pnlPercentage: 0,
+    openTrades: 0,
+    winRate: 0,
+    activeStrategies: 0,
   })
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsRefreshing(true)
+      setError(null)
+
+      const response = await fetch("/api/dashboard/analytics", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard data")
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.analytics) {
+        setPortfolioData({
+          totalValue: data.analytics.portfolio?.totalValue || 0,
+          totalPnL: data.analytics.portfolio?.totalPnL || 0,
+          pnlPercentage: data.analytics.portfolio?.pnlPercentage || 0,
+          openTrades: data.analytics.trading?.openTrades || 0,
+          winRate: data.analytics.trading?.winRate || 0,
+          activeStrategies: data.analytics.trading?.activeStrategies || 0,
+        })
+      }
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err)
+      setError(err instanceof Error ? err.message : "Failed to load data")
+      toast({
+        title: "Error",
+        description: "Failed to fetch dashboard data. Using cached values.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRefreshing(false)
+      setDataLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (user) {
+      fetchDashboardData()
+
+      // Poll for updates every 30 seconds
+      const interval = setInterval(fetchDashboardData, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [user])
+
+  const handleRefresh = () => {
+    fetchDashboardData()
+    toast({
+      title: "Refreshing",
+      description: "Fetching latest data...",
+    })
+  }
 
   if (loading) {
     return (
@@ -62,10 +137,20 @@ export default function DashboardPage() {
               <p className="text-muted-foreground">Welcome back, {user.username}</p>
             </div>
             <div className="flex items-center space-x-2">
+              {error && (
+                <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  Connection Issue
+                </Badge>
+              )}
               <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
                 <Activity className="w-3 h-3 mr-1" />
                 Live
               </Badge>
+              <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
+                <RefreshCw className={`w-4 h-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
               <Button variant="outline" size="sm">
                 Settings
               </Button>
@@ -80,10 +165,20 @@ export default function DashboardPage() {
                 <DollarSign className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${portfolioData.totalValue.toLocaleString()}</div>
-                <div className="flex items-center text-xs text-green-500">
-                  <TrendingUp className="w-3 h-3 mr-1" />+{portfolioData.pnlPercentage}% from last month
-                </div>
+                {dataLoading ? (
+                  <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">${portfolioData.totalValue.toLocaleString()}</div>
+                    <div
+                      className={`flex items-center text-xs ${portfolioData.pnlPercentage >= 0 ? "text-green-500" : "text-red-500"}`}
+                    >
+                      <TrendingUp className="w-3 h-3 mr-1" />
+                      {portfolioData.pnlPercentage >= 0 ? "+" : ""}
+                      {portfolioData.pnlPercentage.toFixed(2)}% from last month
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -93,8 +188,18 @@ export default function DashboardPage() {
                 <TrendingUp className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-green-500">+${portfolioData.totalPnL.toLocaleString()}</div>
-                <div className="text-xs text-muted-foreground">{portfolioData.openTrades} open trades</div>
+                {dataLoading ? (
+                  <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                ) : (
+                  <>
+                    <div
+                      className={`text-2xl font-bold ${portfolioData.totalPnL >= 0 ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {portfolioData.totalPnL >= 0 ? "+" : ""}${portfolioData.totalPnL.toLocaleString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{portfolioData.openTrades} open trades</div>
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -104,8 +209,14 @@ export default function DashboardPage() {
                 <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{portfolioData.winRate}%</div>
-                <Progress value={portfolioData.winRate} className="mt-2" />
+                {dataLoading ? (
+                  <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{portfolioData.winRate.toFixed(1)}%</div>
+                    <Progress value={portfolioData.winRate} className="mt-2" />
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -115,8 +226,16 @@ export default function DashboardPage() {
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{portfolioData.activeStrategies}</div>
-                <div className="text-xs text-muted-foreground">2 performing above target</div>
+                {dataLoading ? (
+                  <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                ) : (
+                  <>
+                    <div className="text-2xl font-bold">{portfolioData.activeStrategies}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {portfolioData.activeStrategies > 0 ? "Strategies running" : "No active strategies"}
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

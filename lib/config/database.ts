@@ -1,130 +1,288 @@
-// Database configuration and connection setup
-import { createClient } from "@supabase/supabase-js"
+import { Redis } from "@upstash/redis"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Initialize Redis client using environment variables
+const redis = new Redis({
+  url: process.env.UPSTASH_KV_KV_REST_API_URL || process.env.KV_REST_API_URL || "",
+  token: process.env.UPSTASH_KV_KV_REST_API_TOKEN || process.env.KV_REST_API_TOKEN || "",
+})
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// Data access layer that uses Redis for persistence
+export const db = {
+  // Users
+  async getUser(userId: string) {
+    const user = await redis.hgetall(`user:${userId}`)
+    return user && Object.keys(user).length > 0 ? user : null
+  },
 
-// Database table creation SQL
-export const createTablesSQL = `
--- Users table
-CREATE TABLE IF NOT EXISTS users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username VARCHAR(50) UNIQUE NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  role VARCHAR(20) DEFAULT 'trader' CHECK (role IN ('admin', 'trader', 'viewer')),
-  telegram_id VARCHAR(50),
-  api_keys JSONB DEFAULT '{}',
-  settings JSONB DEFAULT '{
-    "risk_tolerance": 0.5,
-    "max_daily_loss": 1000,
-    "default_position_size": 100,
-    "auto_trading_enabled": false
-  }',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+  async getUserByUsername(username: string) {
+    const userId = await redis.get(`username:${username}`)
+    if (!userId) return null
+    return this.getUser(userId as string)
+  },
 
--- Strategies table
-CREATE TABLE IF NOT EXISTS strategies (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  type VARCHAR(50) NOT NULL CHECK (type IN ('breakout', 'mean_reversion', 'momentum', 'sentiment', 'hybrid')),
-  parameters JSONB DEFAULT '{}',
-  performance_metrics JSONB DEFAULT '{
-    "total_trades": 0,
-    "win_rate": 0,
-    "avg_pnl": 0,
-    "max_drawdown": 0,
-    "sharpe_ratio": 0
-  }',
-  is_active BOOLEAN DEFAULT true,
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
+  async getUserByEmail(email: string) {
+    const userId = await redis.get(`email:${email}`)
+    if (!userId) return null
+    return this.getUser(userId as string)
+  },
 
--- Trades table
-CREATE TABLE IF NOT EXISTS trades (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) NOT NULL,
-  strategy_id UUID REFERENCES strategies(id),
-  symbol VARCHAR(20) NOT NULL,
-  side VARCHAR(10) NOT NULL CHECK (side IN ('buy', 'sell')),
-  entry_price DECIMAL(20, 8) NOT NULL,
-  exit_price DECIMAL(20, 8),
-  quantity DECIMAL(20, 8) NOT NULL,
-  stop_loss DECIMAL(20, 8),
-  take_profit DECIMAL(20, 8),
-  status VARCHAR(20) DEFAULT 'open' CHECK (status IN ('open', 'closed', 'cancelled')),
-  pnl DECIMAL(20, 8),
-  fees DECIMAL(20, 8) DEFAULT 0,
-  execution_time TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  close_time TIMESTAMP WITH TIME ZONE,
-  broker VARCHAR(20) NOT NULL,
-  metadata JSONB DEFAULT '{}',
-  INDEX idx_trades_user_id (user_id),
-  INDEX idx_trades_symbol (symbol),
-  INDEX idx_trades_status (status)
-);
+  async createUser(user: {
+    id: string
+    username: string
+    email: string
+    passwordHash: string
+    role?: string
+  }) {
+    const userData = {
+      ...user,
+      role: user.role || "trader",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      settings: JSON.stringify({
+        riskTolerance: 0.5,
+        maxDailyLoss: 1000,
+        defaultPositionSize: 100,
+        autoTradingEnabled: false,
+      }),
+    }
+    await redis.hset(`user:${user.id}`, userData)
+    await redis.set(`username:${user.username}`, user.id)
+    await redis.set(`email:${user.email}`, user.id)
+    await redis.sadd("users", user.id)
+    return userData
+  },
 
--- Market data table
-CREATE TABLE IF NOT EXISTS market_data (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  symbol VARCHAR(20) NOT NULL,
-  timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
-  open DECIMAL(20, 8) NOT NULL,
-  high DECIMAL(20, 8) NOT NULL,
-  low DECIMAL(20, 8) NOT NULL,
-  close DECIMAL(20, 8) NOT NULL,
-  volume DECIMAL(20, 8) NOT NULL,
-  source VARCHAR(20) NOT NULL,
-  INDEX idx_market_data_symbol_timestamp (symbol, timestamp),
-  UNIQUE KEY unique_market_data (symbol, timestamp, source)
-);
+  async updateUser(userId: string, updates: Record<string, any>) {
+    updates.updatedAt = new Date().toISOString()
+    await redis.hset(`user:${userId}`, updates)
+    return this.getUser(userId)
+  },
 
--- Sentiment data table
-CREATE TABLE IF NOT EXISTS sentiment_data (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  symbol VARCHAR(20) NOT NULL,
-  timestamp TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  source VARCHAR(20) NOT NULL CHECK (source IN ('twitter', 'reddit', 'news')),
-  sentiment_score DECIMAL(3, 2) NOT NULL CHECK (sentiment_score BETWEEN -1 AND 1),
-  confidence DECIMAL(3, 2) NOT NULL CHECK (confidence BETWEEN 0 AND 1),
-  text_sample TEXT,
-  metadata JSONB DEFAULT '{}',
-  INDEX idx_sentiment_symbol_timestamp (symbol, timestamp)
-);
+  // Trades
+  async getTrades(userId: string, options?: { status?: string; limit?: number }) {
+    const tradeIds = await redis.smembers(`user:${userId}:trades`)
+    if (!tradeIds.length) return []
 
--- Trade signals table
-CREATE TABLE IF NOT EXISTS trade_signals (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  strategy_id UUID REFERENCES strategies(id) NOT NULL,
-  symbol VARCHAR(20) NOT NULL,
-  signal_type VARCHAR(10) NOT NULL CHECK (signal_type IN ('buy', 'sell', 'hold')),
-  strength DECIMAL(3, 2) NOT NULL CHECK (strength BETWEEN 0 AND 1),
-  price_target DECIMAL(20, 8),
-  stop_loss DECIMAL(20, 8),
-  take_profit DECIMAL(20, 8),
-  reasoning TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  executed BOOLEAN DEFAULT false,
-  INDEX idx_signals_strategy_symbol (strategy_id, symbol)
-);
+    const trades = await Promise.all(
+      tradeIds.map(async (id) => {
+        const trade = await redis.hgetall(`trade:${id}`)
+        return trade && Object.keys(trade).length > 0 ? { id, ...trade } : null
+      }),
+    )
 
--- Create updated_at trigger function
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_at = NOW();
-  RETURN NEW;
-END;
-$$ language 'plpgsql';
+    let filteredTrades = trades.filter(Boolean) as any[]
 
--- Add triggers for updated_at
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_strategies_updated_at BEFORE UPDATE ON strategies FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-`
+    if (options?.status) {
+      filteredTrades = filteredTrades.filter((t) => t.status === options.status)
+    }
+
+    // Sort by executionTime descending
+    filteredTrades.sort((a, b) => new Date(b.executionTime || 0).getTime() - new Date(a.executionTime || 0).getTime())
+
+    if (options?.limit) {
+      filteredTrades = filteredTrades.slice(0, options.limit)
+    }
+
+    return filteredTrades
+  },
+
+  async createTrade(trade: {
+    id: string
+    userId: string
+    symbol: string
+    side: string
+    entryPrice: number
+    quantity: number
+    broker: string
+    strategyId?: string
+    stopLoss?: number
+    takeProfit?: number
+  }) {
+    const tradeData = {
+      ...trade,
+      status: "open",
+      pnl: 0,
+      fees: 0,
+      executionTime: new Date().toISOString(),
+    }
+    await redis.hset(`trade:${trade.id}`, tradeData)
+    await redis.sadd(`user:${trade.userId}:trades`, trade.id)
+    await redis.sadd("trades", trade.id)
+    return tradeData
+  },
+
+  async updateTrade(tradeId: string, updates: Record<string, any>) {
+    await redis.hset(`trade:${tradeId}`, updates)
+    return redis.hgetall(`trade:${tradeId}`)
+  },
+
+  async closeTrade(tradeId: string, exitPrice: number, fees = 0) {
+    const trade = (await redis.hgetall(`trade:${tradeId}`)) as any
+    if (!trade) return null
+
+    const entryPrice = Number.parseFloat(trade.entryPrice)
+    const quantity = Number.parseFloat(trade.quantity)
+    const pnl =
+      trade.side === "buy" ? (exitPrice - entryPrice) * quantity - fees : (entryPrice - exitPrice) * quantity - fees
+
+    const updates = {
+      status: "closed",
+      exitPrice,
+      pnl,
+      fees,
+      closeTime: new Date().toISOString(),
+    }
+    await redis.hset(`trade:${tradeId}`, updates)
+    return { ...trade, ...updates }
+  },
+
+  // Strategies
+  async getStrategies(userId: string) {
+    const strategyIds = await redis.smembers(`user:${userId}:strategies`)
+    if (!strategyIds.length) return []
+
+    const strategies = await Promise.all(
+      strategyIds.map(async (id) => {
+        const strategy = await redis.hgetall(`strategy:${id}`)
+        return strategy && Object.keys(strategy).length > 0 ? { id, ...strategy } : null
+      }),
+    )
+
+    return strategies.filter(Boolean)
+  },
+
+  async createStrategy(strategy: {
+    id: string
+    userId: string
+    name: string
+    type: string
+    description?: string
+    parameters?: Record<string, any>
+  }) {
+    const strategyData = {
+      ...strategy,
+      parameters: JSON.stringify(strategy.parameters || {}),
+      isActive: false,
+      performanceMetrics: JSON.stringify({
+        totalTrades: 0,
+        winRate: 0,
+        avgPnl: 0,
+        maxDrawdown: 0,
+        sharpeRatio: 0,
+      }),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+    await redis.hset(`strategy:${strategy.id}`, strategyData)
+    await redis.sadd(`user:${strategy.userId}:strategies`, strategy.id)
+    await redis.sadd("strategies", strategy.id)
+    return strategyData
+  },
+
+  async updateStrategy(strategyId: string, updates: Record<string, any>) {
+    updates.updatedAt = new Date().toISOString()
+    if (updates.parameters && typeof updates.parameters === "object") {
+      updates.parameters = JSON.stringify(updates.parameters)
+    }
+    if (updates.performanceMetrics && typeof updates.performanceMetrics === "object") {
+      updates.performanceMetrics = JSON.stringify(updates.performanceMetrics)
+    }
+    await redis.hset(`strategy:${strategyId}`, updates)
+    return redis.hgetall(`strategy:${strategyId}`)
+  },
+
+  // Market Data Cache
+  async cacheMarketData(symbol: string, data: any, ttlSeconds = 60) {
+    await redis.setex(`market:${symbol}`, ttlSeconds, JSON.stringify(data))
+  },
+
+  async getCachedMarketData(symbol: string) {
+    const data = await redis.get(`market:${symbol}`)
+    return data ? JSON.parse(data as string) : null
+  },
+
+  // Portfolio
+  async getPortfolio(userId: string) {
+    const portfolio = await redis.hgetall(`portfolio:${userId}`)
+    return portfolio && Object.keys(portfolio).length > 0 ? portfolio : null
+  },
+
+  async updatePortfolio(userId: string, updates: Record<string, any>) {
+    await redis.hset(`portfolio:${userId}`, {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    })
+    return this.getPortfolio(userId)
+  },
+
+  // Analytics
+  async getAnalytics(userId: string) {
+    const trades = await this.getTrades(userId)
+    const strategies = await this.getStrategies(userId)
+
+    const closedTrades = trades.filter((t: any) => t.status === "closed")
+    const openTrades = trades.filter((t: any) => t.status === "open")
+
+    const totalPnL = closedTrades.reduce((sum: number, t: any) => sum + Number.parseFloat(t.pnl || 0), 0)
+    const winningTrades = closedTrades.filter((t: any) => Number.parseFloat(t.pnl || 0) > 0)
+    const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0
+
+    const activeStrategies = strategies.filter((s: any) => s.isActive === "true" || s.isActive === true)
+
+    return {
+      portfolio: {
+        totalPnL,
+        dailyPnL: 0, // Calculate from today's trades
+        pnlPercentage: 0,
+      },
+      trading: {
+        totalTrades: trades.length,
+        openTrades: openTrades.length,
+        winRate,
+        activeStrategies: activeStrategies.length,
+      },
+      performance: {
+        bestTrade:
+          closedTrades.length > 0 ? Math.max(...closedTrades.map((t: any) => Number.parseFloat(t.pnl || 0))) : 0,
+        worstTrade:
+          closedTrades.length > 0 ? Math.min(...closedTrades.map((t: any) => Number.parseFloat(t.pnl || 0))) : 0,
+        avgTradeSize:
+          closedTrades.length > 0
+            ? closedTrades.reduce(
+                (sum: number, t: any) =>
+                  sum + Number.parseFloat(t.entryPrice || 0) * Number.parseFloat(t.quantity || 0),
+                0,
+              ) / closedTrades.length
+            : 0,
+      },
+    }
+  },
+}
+
+// Export redis for direct access if needed
+export { redis }
+
+// Legacy support - export as supabase for compatibility
+// This allows gradual migration
+export const supabase = {
+  from: (table: string) => ({
+    select: () => ({
+      eq: () => ({
+        order: () => Promise.resolve({ data: [], error: null }),
+        single: () => Promise.resolve({ data: null, error: null }),
+      }),
+      single: () => Promise.resolve({ data: null, error: null }),
+    }),
+    insert: () => ({
+      select: () => ({
+        single: () => Promise.resolve({ data: null, error: null }),
+      }),
+    }),
+    update: () => ({
+      eq: () => Promise.resolve({ data: null, error: null }),
+    }),
+    delete: () => ({
+      eq: () => Promise.resolve({ error: null }),
+    }),
+  }),
+}

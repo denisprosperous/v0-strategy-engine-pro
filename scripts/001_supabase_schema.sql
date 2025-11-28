@@ -92,4 +92,3 @@ create trigger update_users_updated_at before update on public.users for each ro
 
 drop trigger if exists update_strategies_updated_at on public.strategies;
 create trigger update_strategies_updated_at before update on public.strategies for each row execute function public.update_updated_at_column();
-

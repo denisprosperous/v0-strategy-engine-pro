@@ -67,7 +67,7 @@ Implement complete Telegram bot integration for the Institutional Sniper strateg
 - **LOC:** ~140 lines
 
 **Environment Variables:**
-```bash
+\`\`\`bash
 TELEGRAM_BOT_TOKEN=required
 TELEGRAM_CHAT_ID=required
 TELEGRAM_USE_WEBHOOK=optional
@@ -76,7 +76,7 @@ TELEGRAM_WEBHOOK_PORT=optional
 TELEGRAM_CONFIRMATION_TIMEOUT=optional
 TELEGRAM_ALERT_COOLDOWN=optional
 TELEGRAM_MAX_PENDING=optional
-```
+\`\`\`
 
 ---
 
@@ -151,14 +151,14 @@ TELEGRAM_MAX_PENDING=optional
 
 ## 📦 File Breakdown
 
-```
+\`\`\`
 telegram_integration/
 ├── __init__.py              # Package initialization (40 LOC)
 ├── sniper_bot.py            # Core bot logic (560 LOC) ⭐
 ├── bot_config.py            # Configuration (140 LOC)
 ├── alert_manager.py         # Alert orchestration (240 LOC)
 └── README.md                # Documentation (290 LOC)
-```
+\`\`\`
 
 ---
 
@@ -166,7 +166,7 @@ telegram_integration/
 
 ### **Layered Design**
 
-```
+\`\`\`
 ┌─────────────────────────────────────┐
 │   Institutional Sniper Strategy      │
 │  (Detects institutional signals)     │
@@ -201,7 +201,7 @@ telegram_integration/
 │  - Clicks buttons                     │
 │  - Confirms/rejects trades            │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 ### **Data Flow**
 
@@ -240,7 +240,7 @@ telegram_integration/
 
 ### **3. Callback Pattern**
 
-```python
+\`\`\`python
 # Register callbacks
 alert_manager.register_callback('entry', on_buy_confirmed)
 alert_manager.register_callback('exit', on_sell_confirmed)
@@ -249,7 +249,7 @@ alert_manager.register_callback('exit', on_sell_confirmed)
 async def on_buy_confirmed(token_address: str, size_usd: float):
     # Execute buy logic
     pass
-```
+\`\`\`
 
 **Advantages:**
 - Decouples alert system from trading logic
@@ -260,7 +260,7 @@ async def on_buy_confirmed(token_address: str, size_usd: float):
 
 ## 🧠 Integration Example
 
-```python
+\`\`\`python
 from telegram_integration import initialize_telegram_alerts
 
 async def execute_sniper_buy(token_address: str, size_usd: float):
@@ -285,7 +285,7 @@ await alert_manager.send_entry_alert(
     token_symbol="PEPE",
     # ... other params
 )
-```
+\`\`\`
 
 ---
 

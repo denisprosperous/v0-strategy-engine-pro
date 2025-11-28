@@ -351,12 +351,12 @@ Due to context window limitations, implementation will be broken into **9 segmen
 
 ## DEPENDENCIES TO ADD
 
-```txt
+\`\`\`txt
 # Add to requirements.txt
 redis>=5.0.0
 aioredis>=2.0.1
 pydantic>=2.0.0
-```
+\`\`\`
 
 ---
 

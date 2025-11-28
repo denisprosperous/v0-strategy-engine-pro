@@ -10,4 +10,3 @@ export function assertRedis() {
   if (!redis) throw new Error("Upstash Redis not configured; set UPSTASH_REDIS_REST_URL and token")
   return redis
 }
-

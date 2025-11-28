@@ -77,4 +77,3 @@ export class MomentumStrategy extends BaseStrategy {
     return null
   }
 }
-

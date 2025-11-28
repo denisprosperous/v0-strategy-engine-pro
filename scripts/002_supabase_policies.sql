@@ -36,4 +36,3 @@ create policy if not exists market_data_read on public.market_data
 
 create policy if not exists sentiment_data_read on public.sentiment_data
   for select using (true);
-

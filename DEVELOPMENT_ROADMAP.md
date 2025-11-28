@@ -35,37 +35,37 @@ Build the **most complete, production-ready AI-powered trading platform** that:
 ### 1.1 Enhanced Data Models
 **Location:** `database/models.py` & `database/schemas.py`
 
-```
+\`\`\`
 WHAT TO BUILD:
 - AssetClass enum (CRYPTO, FOREX, STOCKS)
 - Pair model supporting all asset classes
 - Signal generation history & analytics
 - Trade execution records with P&L
 - Risk metrics & portfolio snapshots
-```
+\`\`\`
 
 ### 1.2 Unified Asset Interface
 **Location:** `assets/base_asset.py`
 
-```
+\`\`\`
 WHAT TO BUILD:
 - Abstract Asset class
 - Concrete implementations:
   - CryptoAsset (ticker: BTC, ETH)
   - ForexAsset (pair: EUR/USD)
   - StockAsset (ticker: AAPL, MSFT)
-```
+\`\`\`
 
 ### 1.3 Universal Data Pipeline
 **Location:** `data_pipeline/universal_feeder.py`
 
-```
+\`\`\`
 WHAT TO BUILD:
 - Unified OHLCV data fetching
 - Real-time tick aggregation
 - Historical data management
 - Data validation & sanitization
-```
+\`\`\`
 
 ---
 
@@ -76,38 +76,38 @@ WHAT TO BUILD:
 
 **Use:** AES-256-GCM + Argon2
 
-```python
+\`\`\`python
 Requirements:
 ✅ All API keys encrypted at rest
 ✅ HSM-compatible design
 ✅ Zero-knowledge architecture
 ✅ Key rotation support
 ✅ Audit logging for all access
-```
+\`\`\`
 
 ### 2.2 API Key Management System
 **Location:** `security/key_manager.py`
 
-```
+\`\`\`
 FEATURES:
 - Secure key storage in encrypted vault
 - Per-exchange key isolation
 - Key expiration & rotation
 - Access control lists (ACL)
 - Audit trail with timestamps
-```
+\`\`\`
 
 ### 2.3 First-Run Setup Wizard
 **Location:** `app/setup/setup_wizard.py` + UI Components
 
-```
+\`\`\`
 FLOW:
 1. Welcome screen with security overview
 2. API key input for each exchange/broker
 3. Encryption password setup
 4. Connection verification
 5. Settings confirmation
-```
+\`\`\`
 
 ---
 
@@ -116,7 +116,7 @@ FLOW:
 ### 3.1 Technical Analysis Module
 **Location:** `signals/technical_analysis.py`
 
-```
+\`\`\`
 INDICATORS TO IMPLEMENT:
 - Moving Averages (SMA, EMA, WMA)
 - Momentum (RSI, MACD, Stochastic)
@@ -128,12 +128,12 @@ INDICATORS TO IMPLEMENT:
 PYTHON LIBRARIES:
 - pandas-ta for calculations
 - numpy for performance
-```
+\`\`\`
 
 ### 3.2 Sentiment Analysis Module
 **Location:** `signals/sentiment_analyzer.py`
 
-```
+\`\`\`
 DATA SOURCES:
 - News APIs (NewsAPI, CryptoCompare)
 - Social media (Twitter/X API)
@@ -144,12 +144,12 @@ SENTIMENT SCORING:
 - -1.0 (bearish) to +1.0 (bullish)
 - Aggregated scores by source
 - Time-weighted relevance
-```
+\`\`\`
 
 ### 3.3 Machine Learning Signal Model
 **Location:** `signals/ml_signal_model.py`
 
-```
+\`\`\`
 MODEL ARCHITECTURE:
 - Random Forest classifier (signal probability)
 - XGBoost for feature importance
@@ -161,12 +161,12 @@ FEATURES:
 - Sentiment scores
 - Market microstructure
 - Macroeconomic factors
-```
+\`\`\`
 
 ### 3.4 Signal Quality Scoring
 **Location:** `signals/signal_quality.py`
 
-```
+\`\`\`
 METRICS:
 ✅ Confidence score (0-100%)
 ✅ Historical win rate on this pair
@@ -174,7 +174,7 @@ METRICS:
 ✅ Max drawdown impact
 ✅ Risk/reward ratio
 ✅ Signal age & freshness
-```
+\`\`\`
 
 ---
 
@@ -183,7 +183,7 @@ METRICS:
 ### 4.1 Pair Analysis Engine
 **Location:** `analytics/pair_analyzer.py`
 
-```
+\`\`\`
 ANALYSIS FOR EACH PAIR:
 
 1. TECHNICAL SETUP
@@ -209,12 +209,12 @@ ANALYSIS FOR EACH PAIR:
    - Cross-asset correlations
    - Sector trends
    - Macro regime detection
-```
+\`\`\`
 
 ### 4.2 Trade Recommendation System
 **Location:** `recommendations/trade_recommender.py`
 
-```
+\`\`\`
 RECOMMENDATION STRUCTURE:
 {
   "pair": "EUR/USD",
@@ -236,12 +236,12 @@ RECOMMENDATION STRUCTURE:
   "validity_until": "2025-11-21T14:00:00Z",
   "reasoning": "Strong uptrend with RSI 45-70, MA alignment bullish..."
 }
-```
+\`\`\`
 
 ### 4.3 Performance Backtester
 **Location:** `backtesting/pair_backtester.py`
 
-```
+\`\`\`
 BACKTEST METRICS:
 ✅ Total return %
 ✅ Sharpe ratio
@@ -253,7 +253,7 @@ BACKTEST METRICS:
 ✅ Consecutive losses
 ✅ Recovery factor
 ✅ Calmar ratio
-```
+\`\`\`
 
 ---
 
@@ -262,25 +262,25 @@ BACKTEST METRICS:
 ### 5.1 Encrypted Database
 **Location:** `database/encrypted_db.py`
 
-```
+\`\`\`
 FEATURES:
 - All sensitive data encrypted at column level
 - API keys: AES-256-GCM
 - User passwords: Argon2 (memory-hard)
 - PII data: FPE (Format-Preserving Encryption)
-```
+\`\`\`
 
 ### 5.2 Secure Session Management
 **Location:** `security/session_manager.py`
 
-```
+\`\`\`
 IMPLEMENT:
 - JWT tokens (RS256 signing)
 - Token rotation (refresh tokens)
 - CSRF protection
 - Rate limiting per user
 - Suspicious activity detection
-```
+\`\`\`
 
 ---
 
@@ -289,7 +289,7 @@ IMPLEMENT:
 ### 6.1 Settings & API Key Management UI
 **Location:** `app/pages/settings/`
 
-```
+\`\`\`
 COMPONENTS:
 ✅ API Keys page
    - Add new key form
@@ -309,26 +309,26 @@ COMPONENTS:
    - Password change
    - Session management
    - Login history
-```
+\`\`\`
 
 ### 6.2 Signal Dashboard
 **Location:** `app/pages/signals/`
 
-```
+\`\`\`
 DISPLAY:
 - Active signal feeds (real-time)
 - Signal history with P&L
 - Pair analysis charts
 - Performance metrics
 - Notification preferences
-```
+\`\`\`
 
 ---
 
 ## 🚀 PHASE 7: PRODUCTION DEPLOYMENT (Weeks 10-12)
 
 ### 7.1 Docker & Container Setup
-```dockerfile
+\`\`\`dockerfile
 FROM python:3.11-slim
 WORKDIR /app
 COPY requirements.txt .
@@ -336,10 +336,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0"]
-```
+\`\`\`
 
 ### 7.2 Kubernetes Deployment
-```yaml
+\`\`\`yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -358,13 +358,13 @@ spec:
           limits:
             cpu: "2"
             memory: "4Gi"
-```
+\`\`\`
 
 ---
 
 ## 📋 ESTIMATED TIMELINE
 
-```
+\`\`\`
 Phase 1 (Weeks 1-2):   Core Architecture       ▓▓▓░░░░░░░  20%
 Phase 2 (Weeks 2-3):   API Security            ▓▓░░░░░░░░  10%
 Phase 3 (Weeks 3-5):   Signal Generation       ▓░░░░░░░░░   5%
@@ -374,13 +374,13 @@ Phase 6 (Weeks 8-10):  UI Completion           ░░░░░░░░░░   
 Phase 7 (Weeks 10-12): Production Deploy       ░░░░░░░░░░   0%
 
 TOTAL: ~12 weeks to PRODUCTION-READY MVP
-```
+\`\`\`
 
 ---
 
 ## ✅ SUCCESS CRITERIA
 
-```
+\`\`\`
 ✅ All 3 asset classes functional
 ✅ <100ms signal latency
 ✅ <50ms API key lookup (encrypted)
@@ -392,4 +392,4 @@ TOTAL: ~12 weeks to PRODUCTION-READY MVP
 ✅ Docker + K8s ready
 ✅ Comprehensive documentation
 ✅ Full test coverage (>85%)
-```
+\`\`\`

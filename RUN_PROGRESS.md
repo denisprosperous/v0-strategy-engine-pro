@@ -285,7 +285,7 @@ Blockers: None
 
 ## 🎯 OVERALL PROGRESS AFTER RUN 9 - DUAL TARGET ACHIEVEMENT! ✅✅
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────┐
 │  TIER 1 IMPLEMENTATION STATUS                   │
 ├─────────────────────────────────────────────────┤
@@ -308,7 +308,7 @@ Blockers: None
 │  Overall Progress:     77.5%                    │
 │  Status: BOTH TARGETS ACHIEVED! 🎉              │
 └─────────────────────────────────────────────────┘
-```
+\`\`\`
 
 Total Commits: 26
 Total LOC: ~8,000+
@@ -342,7 +342,7 @@ Key Run 9 Achievements:
 
 ### System Architecture (Complete):
 
-```
+\`\`\`
 ┌──────────────────────────────────────────────────┐
 │            DATA LAYER (70% ✅)                   │
 ├──────────────────────────────────────────────────┤
@@ -372,7 +372,7 @@ Key Run 9 Achievements:
 │       ↓                                          │
 │  [TRADES EXECUTED & MANAGED]                     │
 └──────────────────────────────────────────────────┘
-```
+\`\`\`
 
 ### What's Fully Operational:
 

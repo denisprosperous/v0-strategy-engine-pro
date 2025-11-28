@@ -6,21 +6,21 @@ Thank you for considering contributing to **v0-strategy-engine-pro**! This docum
 
 1. **Fork the repository** on GitHub.
 2. **Clone your fork** locally:
-   ```bash
+   \`\`\`bash
    git clone https://github.com/YOUR_USERNAME/v0-strategy-engine-pro.git
    cd v0-strategy-engine-pro
-   ```
+   \`\`\`
 3. **Create a new branch** for your feature or fix:
-   ```bash
+   \`\`\`bash
    git checkout -b feature/your-feature-name
-   ```
+   \`\`\`
 4. **Set up your environment**:
-   ```bash
+   \`\`\`bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    pip install -r requirements.txt
    pip install -r requirements-dev.txt  # For testing and profiling tools
-   ```
+   \`\`\`
 
 ## Before Submitting a PR
 
@@ -35,14 +35,14 @@ Review the relevant sections in `OPTIMIZATION.md` to identify optimization items
 ### 2. Run Profiling
 Before and after your changes, run profiling to measure performance impact:
 
-```bash
+\`\`\`bash
 # Profile the main components
 python scripts/profile.py --module trading --function main_loop
 python scripts/profile.py --module analytics --function compute_metrics
 
 # Run benchmark suite
 pytest tests/benchmarks/ -v --benchmark-disable-gc
-```
+\`\`\`
 
 Document baseline and optimized results in your PR description.
 
@@ -53,9 +53,9 @@ Document baseline and optimized results in your PR description.
 - Use mocks to avoid hitting live APIs.
 
 Run tests locally:
-```bash
+\`\`\`bash
 pytest tests/ -v --cov=. --cov-report=html
-```
+\`\`\`
 
 ### 4. Code Quality
 - Follow PEP 8 style guidelines.
@@ -65,11 +65,11 @@ pytest tests/ -v --cov=. --cov-report=html
 - Include inline comments for complex logic.
 
 Run linters locally:
-```bash
+\`\`\`bash
 pylint **/*.py
 black --check .
 isort --check-only .
-```
+\`\`\`
 
 ### 5. Update Documentation
 - Update `README.md` if adding new features or commands.
@@ -108,23 +108,23 @@ Your PR will be reviewed based on the following criteria:
 If your PR is focused on optimization:
 
 1. **Include benchmark results** in the PR description:
-   ```
+   \`\`\`
    ### Performance Impact
    - Trading loop latency: 120ms → 85ms (29% improvement)
    - Analytics calculations: 450ms → 320ms (28% improvement)
    - Memory usage: 250MB → 220MB (12% improvement)
-   ```
+   \`\`\`
 
 2. **Explain the optimization** (e.g., vectorization, caching, async patterns).
 
 3. **Provide a baseline comparison**:
-   ```bash
+   \`\`\`bash
    # Before optimization
    python scripts/profile.py ... > profile_before.txt
    
    # After optimization
    python scripts/profile.py ... > profile_after.txt
-   ```
+   \`\`\`
 
 4. **Test on diverse data** (different symbols, timeframes, market conditions).
 
@@ -145,13 +145,13 @@ When reporting bugs or requesting features:
 
 Use the following format for commit messages:
 
-```
+\`\`\`
 <type>(<scope>): <subject>
 
 <body>
 
 <footer>
-```
+\`\`\`
 
 **Type**: feat, fix, docs, style, refactor, test, chore, perf  
 **Scope**: Module or component affected (e.g., trading, ai_models, risk_management)  
@@ -161,49 +161,49 @@ Use the following format for commit messages:
 
 ### Examples
 
-```
+\`\`\`
 perf(trading): Optimize order submission latency with async patterns
 
 Refactored trading loop to use asyncio for concurrent data processing and order placement.
 Reduced latency from 120ms to 85ms (29% improvement).
 
 Closes #42
-```
+\`\`\`
 
-```
+\`\`\`
 feat(ai_models): Add model result caching for repeated analyses
 
 Implement in-memory cache (TTL: 5 mins) for model predictions on same symbol/timeframe.
 Reduces redundant API calls and improves response time.
 
 Related to #35
-```
+\`\`\`
 
 ## Development Tips
 
 ### Profiling Hot Spots
-```bash
+\`\`\`bash
 # Use cProfile to identify slow functions
 python -m cProfile -s cumulative scripts/main.py > profile.txt
 
 # Use line_profiler for line-by-line analysis
 kernprof -l -v scripts/main.py
-```
+\`\`\`
 
 ### Testing in Isolation
-```bash
+\`\`\`bash
 # Run specific test
 pytest tests/unit/test_trading.py::test_order_execution -v
 
 # Run tests matching a pattern
 pytest tests/ -k "trading" -v
-```
+\`\`\`
 
 ### Paper Trading
-```bash
+\`\`\`bash
 # Test strategy before live trading
 python scripts/backtest.py --paper --symbol BTC/USDT --timeframe 1h
-```
+\`\`\`
 
 ## Questions?
 

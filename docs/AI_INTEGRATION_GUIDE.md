@@ -6,7 +6,7 @@ This guide covers the complete integration of AI model ensemble into the v0-stra
 
 ### **Architecture**
 
-```
+\`\`\`
 ┌─────────────────────────────────────────────────────────────┐
 │                    Trading Pipeline                          │
 └─────────────────────────────────────────────────────────────┘
@@ -35,7 +35,7 @@ This guide covers the complete integration of AI model ensemble into the v0-stra
    │ OpenAI │        │Claude  │        │ Gemini │
    │Provider│        │Provider│        │Provider│
    └────────┘        └────────┘        └────────┘
-```
+\`\`\`
 
 ---
 
@@ -52,13 +52,13 @@ Manages AI provider settings, API keys, and runtime configuration.
 - Default value fallback
 
 **Usage:**
-```python
+\`\`\`python
 from ai_models.ai_config import AIConfigManager
 
 config_manager = AIConfigManager()
 config = config_manager.get_config()
 api_keys = config_manager.get_api_keys()
-```
+\`\`\`
 
 ### 2. **Integration Adapter** (`ai_models/ai_integration_adapter.py`)
 
@@ -71,7 +71,7 @@ Bridge between AI ensemble and trading pipeline.
 - Boost/block logic for signals
 
 **Usage:**
-```python
+\`\`\`python
 from ai_models.ai_integration_adapter import AIIntegrationAdapter
 
 adapter = AIIntegrationAdapter(enable_ai=True)
@@ -83,7 +83,7 @@ enhancement = await adapter.enhance_signal(
     technical_indicators={"rsi": 30, "ema_20": 42100},
     timeframe="1h"
 )
-```
+\`\`\`
 
 ### 3. **AI-Enhanced Signal Engine** (`signal_generation/signal_engine_ai_enhanced.py`)
 
@@ -96,7 +96,7 @@ Extends base signal engine with AI capabilities.
 - Signal blocking on high AI risk
 
 **Usage:**
-```python
+\`\`\`python
 from signal_generation.signal_engine_ai_enhanced import AIEnhancedSignalEngine
 
 engine = AIEnhancedSignalEngine(enable_ai=True)
@@ -115,7 +115,7 @@ signal = await engine.classify_signal_with_ai(
     atr=350,
     config=config
 )
-```
+\`\`\`
 
 ### 4. **Ensemble Orchestrator** (`ai_models/ensemble_orchestrator.py`)
 
@@ -133,15 +133,15 @@ Manages multiple AI providers and aggregates responses.
 
 ### **Step 1: Install Dependencies**
 
-```bash
+\`\`\`bash
 pip install openai anthropic google-generativeai aiohttp tenacity
-```
+\`\`\`
 
 ### **Step 2: Configure Environment Variables**
 
 Create a `.env` file or export variables:
 
-```bash
+\`\`\`bash
 # Global AI Settings
 export AI_ENABLED=true
 export AI_MIN_PROVIDERS=2
@@ -168,11 +168,11 @@ export AI_CONFIDENCE_BOOST_MULTIPLIER=20.0
 export AI_CACHE_ENABLED=true
 export AI_CACHE_TTL_SECONDS=300
 export AI_REQUEST_TIMEOUT=30
-```
+\`\`\`
 
 ### **Step 3: Initialize AI System**
 
-```python
+\`\`\`python
 import asyncio
 from signal_generation.signal_engine_ai_enhanced import AIEnhancedSignalEngine
 
@@ -194,7 +194,7 @@ async def initialize_trading_system():
 
 if __name__ == "__main__":
     engine = asyncio.run(initialize_trading_system())
-```
+\`\`\`
 
 ---
 
@@ -202,7 +202,7 @@ if __name__ == "__main__":
 
 ### **Example 1: Basic Signal Generation with AI**
 
-```python
+\`\`\`python
 import asyncio
 from signal_generation.signal_engine_ai_enhanced import AIEnhancedSignalEngine
 
@@ -252,11 +252,11 @@ async def generate_ai_signal():
         print("No signal (or blocked by AI)")
 
 asyncio.run(generate_ai_signal())
-```
+\`\`\`
 
 ### **Example 2: Integration with Trading Mode Manager**
 
-```python
+\`\`\`python
 import asyncio
 from signal_generation.signal_engine_ai_enhanced import AIEnhancedSignalEngine
 from trading_mode_manager import TradingModeManager, TradingMode
@@ -283,11 +283,11 @@ async def main():
     await mode_manager.stop()
 
 asyncio.run(main())
-```
+\`\`\`
 
 ### **Example 3: Risk Assessment**
 
-```python
+\`\`\`python
 import asyncio
 from ai_models.ai_integration_adapter import AIIntegrationAdapter
 
@@ -318,7 +318,7 @@ async def assess_trade_risk():
     print(f"Confidence: {confidence:.2f}")
 
 asyncio.run(assess_trade_risk())
-```
+\`\`\`
 
 ---
 
@@ -358,7 +358,7 @@ For each provider (OpenAI, Anthropic, Gemini, Grok, etc.):
 
 ### **Run Integration Tests**
 
-```bash
+\`\`\`bash
 # Run all AI integration tests
 pytest tests/test_ai_integration.py -v
 
@@ -367,11 +367,11 @@ pytest tests/test_ai_integration.py::TestAIConfiguration -v
 
 # Run with coverage
 pytest tests/test_ai_integration.py --cov=ai_models --cov-report=html
-```
+\`\`\`
 
 ### **Manual Testing**
 
-```python
+\`\`\`python
 import asyncio
 from signal_generation.signal_engine_ai_enhanced import AIEnhancedSignalEngine
 
@@ -389,7 +389,7 @@ async def test_ai_system():
     print(stats)
 
 asyncio.run(test_ai_system())
-```
+\`\`\`
 
 ---
 
@@ -397,7 +397,7 @@ asyncio.run(test_ai_system())
 
 ### **Check AI Status**
 
-```python
+\`\`\`python
 from ai_models.ai_integration_adapter import AIIntegrationAdapter
 
 adapter = AIIntegrationAdapter(enable_ai=True)
@@ -409,13 +409,13 @@ print(f"Signals Enhanced: {stats['signals_enhanced']}")
 print(f"Signals Boosted: {stats['signals_boosted']}")
 print(f"Signals Blocked: {stats['signals_blocked']}")
 print(f"Errors: {stats['errors']}")
-```
+\`\`\`
 
 ### **Logging**
 
 Enable detailed AI logging:
 
-```python
+\`\`\`python
 import logging
 
 logging.basicConfig(
@@ -426,7 +426,7 @@ logging.basicConfig(
 # Enable AI-specific loggers
 logging.getLogger('ai_models').setLevel(logging.DEBUG)
 logging.getLogger('signal_generation').setLevel(logging.INFO)
-```
+\`\`\`
 
 ---
 
@@ -436,37 +436,37 @@ logging.getLogger('signal_generation').setLevel(logging.INFO)
 
 Reduce API calls by enabling response caching:
 
-```bash
+\`\`\`bash
 export AI_CACHE_ENABLED=true
 export AI_CACHE_TTL_SECONDS=300
-```
+\`\`\`
 
 ### **2. Parallel Execution**
 
 Enable parallel provider calls for faster response:
 
-```bash
+\`\`\`bash
 export AI_ENABLE_PARALLEL=true
-```
+\`\`\`
 
 ### **3. Provider Selection**
 
 Disable slower/expensive providers if needed:
 
-```bash
+\`\`\`bash
 export OPENAI_ENABLED=true
 export ANTHROPIC_ENABLED=true
 export GEMINI_ENABLED=false  # Disable slower provider
-```
+\`\`\`
 
 ### **4. Rate Limiting**
 
 Adjust rate limits per provider:
 
-```bash
+\`\`\`bash
 export OPENAI_RATE_LIMIT_RPM=60
 export ANTHROPIC_RATE_LIMIT_RPM=50
-```
+\`\`\`
 
 ---
 

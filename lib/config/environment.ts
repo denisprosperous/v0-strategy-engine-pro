@@ -1,9 +1,8 @@
-// Environment configuration and validation
 export const config = {
-  // Database
+  // Database - Now using Upstash Redis
   database: {
-    url: process.env.DATABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL,
-    key: process.env.DATABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    url: process.env.DATABASE_URL || process.env.UPSTASH_KV_KV_REST_API_URL,
+    key: process.env.DATABASE_KEY || process.env.UPSTASH_KV_KV_REST_API_TOKEN,
   },
 
   // JWT Authentication
@@ -39,6 +38,38 @@ export const config = {
     testnet: process.env.BYBIT_TESTNET === "true",
   },
 
+  coinbase: {
+    apiKey: process.env.COINBASE_API_KEY,
+    apiSecret: process.env.COINBASE_API_SECRET,
+  },
+
+  okx: {
+    apiKey: process.env.OKX_API_KEY,
+    apiSecret: process.env.OKX_API_SECRET,
+    passphrase: process.env.OKX_PASSPHRASE,
+  },
+
+  kucoin: {
+    apiKey: process.env.KUCOIN_API_KEY,
+    apiSecret: process.env.KUCOIN_API_SECRET,
+    passphrase: process.env.KUCOIN_PASSPHRASE,
+  },
+
+  gate: {
+    apiKey: process.env.GATE_API_KEY,
+    apiSecret: process.env.GATE_API_SECRET,
+  },
+
+  huobi: {
+    apiKey: process.env.HUOBI_API_KEY,
+    apiSecret: process.env.HUOBI_API_SECRET,
+  },
+
+  mexc: {
+    apiKey: process.env.MEXC_API_KEY,
+    apiSecret: process.env.MEXC_API_SECRET,
+  },
+
   // Telegram Bot
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN,
@@ -58,10 +89,10 @@ export const config = {
     huggingfaceToken: process.env.HUGGINGFACE_TOKEN,
   },
 
-  // Redis Cache
+  // Redis Cache - Upstash
   redis: {
-    url: process.env.REDIS_URL || process.env.KV_REST_API_URL,
-    token: process.env.REDIS_TOKEN || process.env.KV_REST_API_TOKEN,
+    url: process.env.UPSTASH_KV_KV_REST_API_URL || process.env.REDIS_URL,
+    token: process.env.UPSTASH_KV_KV_REST_API_TOKEN || process.env.REDIS_TOKEN,
   },
 
   // Risk Management
@@ -75,23 +106,24 @@ export const config = {
   // AI/ML
   ai: {
     openaiApiKey: process.env.OPENAI_API_KEY,
+    groqApiKey: process.env.GROQ_API_KEY,
     huggingfaceToken: process.env.HUGGINGFACE_TOKEN,
     modelUpdateInterval: Number.parseInt(process.env.MODEL_UPDATE_INTERVAL_HOURS || "24"),
   },
 }
 
-// Validate required environment variables
 export function validateEnvironment() {
-  const required = [
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "SUPABASE_SERVICE_ROLE_KEY",
-    "JWT_SECRET",
-    "TELEGRAM_BOT_TOKEN",
-  ]
+  const required = ["JWT_SECRET"]
 
   const missing = required.filter((key) => !process.env[key])
 
   if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(", ")}`)
+    console.warn(`Missing recommended environment variables: ${missing.join(", ")}`)
+  }
+
+  // Check for Redis connection
+  const hasRedis = process.env.UPSTASH_KV_KV_REST_API_URL || process.env.REDIS_URL
+  if (!hasRedis) {
+    console.warn("No Redis connection configured. Some features may not work.")
   }
 }

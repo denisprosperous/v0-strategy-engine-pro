@@ -51,21 +51,21 @@
 
 ### **Step 1: Install Dependencies**
 
-```bash
+\`\`\`bash
 # Install FastAPI and dependencies
 pip install fastapi uvicorn python-jose[cryptography] python-multipart websockets
-```
+\`\`\`
 
 ### **Step 2: Start Backend API**
 
-```bash
+\`\`\`bash
 # From project root
 cd api
 python main.py
 
 # Or using uvicorn directly
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
+\`\`\`
 
 **Backend will be available at:** http://localhost:8000
 
@@ -75,7 +75,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 Simply open `dashboard/index.html` in your browser, or serve it:
 
-```bash
+\`\`\`bash
 # Option 1: Direct file
 open dashboard/index.html
 
@@ -87,7 +87,7 @@ python -m http.server 3000
 # Option 3: Node.js http-server
 npx http-server dashboard -p 3000
 # Open http://localhost:3000
-```
+\`\`\`
 
 ### **Step 4: Login**
 
@@ -101,7 +101,7 @@ npx http-server dashboard -p 3000
 
 ## 📁 File Structure
 
-```
+\`\`\`
 dashboard/
 ├── index.html      # Main HTML file
 ├── styles.css      # Responsive CSS styling
@@ -110,7 +110,7 @@ dashboard/
 
 api/
 └── main.py         # FastAPI backend
-```
+\`\`\`
 
 ---
 
@@ -209,15 +209,15 @@ api/
 
 ### **Authentication**
 
-```http
+\`\`\`http
 POST /api/auth/login
 Body: {"username": "admin", "password": "changeme"}
 Response: {"access_token": "jwt_token", "token_type": "bearer"}
-```
+\`\`\`
 
 ### **Bot Status**
 
-```http
+\`\`\`http
 GET /api/status
 Headers: Authorization: Bearer {token}
 Response: {
@@ -228,11 +228,11 @@ Response: {
   "active_signals": 3,
   "open_positions": 2
 }
-```
+\`\`\`
 
 ### **Portfolio**
 
-```http
+\`\`\`http
 GET /api/portfolio/balances
 Headers: Authorization: Bearer {token}
 Response: [
@@ -244,11 +244,11 @@ Response: [
     "usd_value": 10000.00
   }
 ]
-```
+\`\`\`
 
 ### **Signals**
 
-```http
+\`\`\`http
 GET /api/signals/recent?limit=10
 Headers: Authorization: Bearer {token}
 Response: [
@@ -266,11 +266,11 @@ Response: [
     "status": "active"
   }
 ]
-```
+\`\`\`
 
 ### **Performance**
 
-```http
+\`\`\`http
 GET /api/performance/metrics
 Headers: Authorization: Bearer {token}
 Response: {
@@ -285,11 +285,11 @@ Response: {
   "sharpe_ratio": 2.35,
   "max_drawdown": 8.5
 }
-```
+\`\`\`
 
 ### **Bot Control**
 
-```http
+\`\`\`http
 POST /api/bot/start
 Headers: Authorization: Bearer {token}
 
@@ -298,7 +298,7 @@ Headers: Authorization: Bearer {token}
 
 POST /api/bot/mode?mode=auto
 Headers: Authorization: Bearer {token}
-```
+\`\`\`
 
 ---
 
@@ -308,7 +308,7 @@ Headers: Authorization: Bearer {token}
 
 **Message Types:**
 
-```javascript
+\`\`\`javascript
 // Bot status change
 {
   "type": "bot_status",
@@ -346,7 +346,7 @@ Headers: Authorization: Bearer {token}
     "timestamp": "2025-11-26T00:00:00"
   }
 }
-```
+\`\`\`
 
 ---
 
@@ -356,7 +356,7 @@ Headers: Authorization: Bearer {token}
 
 Edit `styles.css` variables:
 
-```css
+\`\`\`css
 :root {
     --primary-color: #6366f1;    /* Main brand color */
     --success-color: #10b981;    /* Green for profits */
@@ -364,42 +364,42 @@ Edit `styles.css` variables:
     --bg-primary: #0f172a;       /* Main background */
     --bg-card: #1e293b;          /* Card background */
 }
-```
+\`\`\`
 
 ### **Add New Pages**
 
 1. Add HTML in `index.html`:
-```html
+\`\`\`html
 <div id="mypage-page" class="page">
     <h2 class="page-title">My Page</h2>
     <!-- Content -->
 </div>
-```
+\`\`\`
 
 2. Add navigation in sidebar:
-```html
+\`\`\`html
 <a href="#" class="nav-item" data-page="mypage">
     <i class="fas fa-star"></i>
     <span>My Page</span>
 </a>
-```
+\`\`\`
 
 3. Add loader in `app.js`:
-```javascript
+\`\`\`javascript
 case 'mypage':
     loadMyPageData();
     break;
-```
+\`\`\`
 
 ### **Add New API Endpoints**
 
 Edit `api/main.py`:
 
-```python
+\`\`\`python
 @app.get("/api/myendpoint")
 async def my_endpoint(username: str = Depends(verify_token)):
     return {"data": "my data"}
-```
+\`\`\`
 
 ---
 
@@ -421,19 +421,19 @@ async def my_endpoint(username: str = Depends(verify_token)):
    - Only allow your domain
 
 4. **Set strong JWT secret**
-   ```bash
+   \`\`\`bash
    export JWT_SECRET_KEY="your-very-long-random-secret-key"
-   ```
+   \`\`\`
 
 5. **Enable rate limiting**
    - Add rate limiting middleware
    - Prevent brute force attacks
 
 6. **Use environment variables**
-   ```bash
+   \`\`\`bash
    export API_URL="https://yourdomain.com"
    export JWT_SECRET_KEY="secret"
-   ```
+   \`\`\`
 
 ---
 

@@ -17,4 +17,3 @@ async function notifyHandler(req: AuthenticatedRequest) {
 }
 
 export const POST = withAuth(notifyHandler)
-

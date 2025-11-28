@@ -22,9 +22,9 @@ Professional Telegram bot interface for **Strategy Engine Pro** trading system.
 
 ### 1. Install Dependencies
 
-```bash
+\`\`\`bash
 pip install -r telegram_integration/requirements.txt
-```
+\`\`\`
 
 ### 2. Get Telegram Bot Token
 
@@ -37,7 +37,7 @@ pip install -r telegram_integration/requirements.txt
 
 Create or update your `.env` file:
 
-```bash
+\`\`\`bash
 # Required
 TELEGRAM_BOT_TOKEN=your_bot_token_here
 
@@ -61,7 +61,7 @@ ENABLE_ERROR_NOTIFICATIONS=true
 # Optional - Webhook Mode (Production)
 TELEGRAM_WEBHOOK_URL=https://your-domain.com
 TELEGRAM_WEBHOOK_PORT=8443
-```
+\`\`\`
 
 ### 4. Get Your Telegram User ID
 
@@ -77,32 +77,32 @@ To restrict bot access:
 
 ### Method 1: Direct Run
 
-```bash
+\`\`\`bash
 # Set your token
 export TELEGRAM_BOT_TOKEN="your_token_here"
 
 # Run the bot
 python -m telegram_integration.bot
-```
+\`\`\`
 
 ### Method 2: With Backend API
 
 **Terminal 1 - Start Backend:**
-```bash
+\`\`\`bash
 python api/main.py
-```
+\`\`\`
 
 **Terminal 2 - Start Bot:**
-```bash
+\`\`\`bash
 python -m telegram_integration.bot
-```
+\`\`\`
 
 ### Method 3: Integrated (Recommended)
 
-```bash
+\`\`\`bash
 # Run both backend and bot together
 python main.py --with-telegram
-```
+\`\`\`
 
 ---
 
@@ -154,19 +154,19 @@ python main.py --with-telegram
 ### User Authentication
 
 **Allow specific users only:**
-```bash
+\`\`\`bash
 TELEGRAM_ALLOWED_USERS=123456789,987654321
-```
+\`\`\`
 
 **Set admin users:**
-```bash
+\`\`\`bash
 TELEGRAM_ADMIN_USERS=123456789
-```
+\`\`\`
 
 **Open to all (not recommended):**
-```bash
+\`\`\`bash
 # Don't set TELEGRAM_ALLOWED_USERS
-```
+\`\`\`
 
 ### Admin vs Regular Users
 
@@ -193,10 +193,10 @@ TELEGRAM_ADMIN_USERS=123456789
 - No need for public domain
 
 **Webhook Mode (Production):**
-```bash
+\`\`\`bash
 TELEGRAM_WEBHOOK_URL=https://your-domain.com
 TELEGRAM_WEBHOOK_PORT=8443
-```
+\`\`\`
 - More efficient
 - Requires HTTPS domain
 - Telegram pushes updates to your server
@@ -204,18 +204,18 @@ TELEGRAM_WEBHOOK_PORT=8443
 ### Rate Limiting
 
 Protect your bot from spam:
-```bash
+\`\`\`bash
 TELEGRAM_RATE_LIMIT=true
-```
+\`\`\`
 
 ### Notifications
 
 Control what gets notified:
-```bash
+\`\`\`bash
 ENABLE_TRADE_NOTIFICATIONS=true      # New trades
 ENABLE_SIGNAL_NOTIFICATIONS=true     # New signals
 ENABLE_ERROR_NOTIFICATIONS=true      # Errors
-```
+\`\`\`
 
 ---
 
@@ -223,7 +223,7 @@ ENABLE_ERROR_NOTIFICATIONS=true      # Errors
 
 ### Example 1: Check Status
 
-```
+\`\`\`
 User: /status
 Bot: 🤖 Bot Status
 
@@ -236,11 +236,11 @@ Bot: 🤖 Bot Status
      💼 Open Positions: 2
      
      [⏸️ Stop Trading] [🔄 Refresh]
-```
+\`\`\`
 
 ### Example 2: View Signals
 
-```
+\`\`\`
 User: /signals 5
 Bot: 🚦 Trading Signal
 
@@ -257,11 +257,11 @@ Bot: 🚦 Trading Signal
      📊 Showing 1 of 5 signals
      
      [◀️ Previous] [Next ▶️]
-```
+\`\`\`
 
 ### Example 3: Change Mode
 
-```
+\`\`\`
 User: /mode
 Bot: ⚙️ Select Trading Mode
      
@@ -275,11 +275,11 @@ User: *clicks Semi-Auto*
 Bot: ✅ Mode Changed
      
      Trading mode set to: SEMI-AUTO
-```
+\`\`\`
 
 ### Example 4: View Performance
 
-```
+\`\`\`
 User: /performance
 Bot: 📈 Performance Metrics
 
@@ -293,7 +293,7 @@ Bot: 📈 Performance Metrics
      
      📉 Sharpe Ratio: 2.35
      ⚠️ Max Drawdown: 8.50%
-```
+\`\`\`
 
 ---
 
@@ -302,17 +302,17 @@ Bot: 📈 Performance Metrics
 ### Bot Not Responding
 
 **Check token:**
-```bash
+\`\`\`bash
 echo $TELEGRAM_BOT_TOKEN
-```
+\`\`\`
 
 **Check logs:**
-```bash
+\`\`\`bash
 tail -f telegram_bot.log
-```
+\`\`\`
 
 **Test connection:**
-```python
+\`\`\`python
 import asyncio
 from telegram import Bot
 
@@ -321,7 +321,7 @@ async def test():
     print(await bot.get_me())
 
 asyncio.run(test())
-```
+\`\`\`
 
 ### Permission Denied
 
@@ -348,7 +348,7 @@ Bot commands are set automatically on startup. If not showing:
 
 ### File Structure
 
-```
+\`\`\`
 telegram_integration/
 ├── __init__.py           # Package initialization
 ├── bot.py                # Main bot runner
@@ -358,39 +358,39 @@ telegram_integration/
 ├── utils.py              # Helper functions
 ├── requirements.txt      # Dependencies
 └── TELEGRAM_BOT_README.md # This file
-```
+\`\`\`
 
 ### Adding New Commands
 
 1. **Create handler in `handlers.py`:**
-```python
+\`\`\`python
 async def my_command_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not check_user_permission(update):
         await send_error_message(update, context, "Access denied")
         return
     
     await update.message.reply_text("Hello!")
-```
+\`\`\`
 
 2. **Register in `bot.py`:**
-```python
+\`\`\`python
 self.application.add_handler(CommandHandler("mycommand", my_command_handler))
-```
+\`\`\`
 
 3. **Add to command list:**
-```python
+\`\`\`python
 BotCommand("mycommand", "Description of command")
-```
+\`\`\`
 
 ### Testing
 
-```bash
+\`\`\`bash
 # Run bot in test mode
 python -m pytest tests/test_telegram_bot.py
 
 # Test specific command
 python -m telegram_integration.bot --test-mode
-```
+\`\`\`
 
 ---
 
@@ -398,17 +398,17 @@ python -m telegram_integration.bot --test-mode
 
 ### Docker Deployment
 
-```dockerfile
+\`\`\`dockerfile
 # Add to Dockerfile
 COPY telegram_integration/ /app/telegram_integration/
 RUN pip install -r telegram_integration/requirements.txt
 
 CMD ["python", "-m", "telegram_integration.bot"]
-```
+\`\`\`
 
 ### Systemd Service
 
-```ini
+\`\`\`ini
 [Unit]
 Description=Trading Bot Telegram Interface
 After=network.target
@@ -423,7 +423,7 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target
-```
+\`\`\`
 
 ### Production Checklist
 
@@ -447,14 +447,14 @@ Bot logs to:
 - `telegram_bot.log` file
 
 **View live logs:**
-```bash
+\`\`\`bash
 tail -f telegram_bot.log
-```
+\`\`\`
 
 **Search logs:**
-```bash
+\`\`\`bash
 grep "ERROR" telegram_bot.log
-```
+\`\`\`
 
 ### Metrics to Monitor
 

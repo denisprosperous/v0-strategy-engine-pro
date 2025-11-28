@@ -383,7 +383,7 @@ The v0-strategy-engine-pro is a professional-grade cryptocurrency trading bot wi
 
 ### Current Signal Routing Architecture:
 
-```
+\`\`\`
 [Exchange APIs]
      ↓
 [Data Pipeline] → [Market Data Ingestion]
@@ -397,7 +397,7 @@ The v0-strategy-engine-pro is a professional-grade cryptocurrency trading bot wi
 [Telegram Alert Manager]
      ↓
 [Telegram Bot API] → [User Device]
-```
+\`\`\`
 
 ### Component Integration Status:
 
@@ -427,13 +427,13 @@ The v0-strategy-engine-pro is a professional-grade cryptocurrency trading bot wi
 - Rich message formatting
 
 **Connector Code Structure:**
-```python
+\`\`\`python
 class SniperTelegramConnector:
     def __init__(self, sniper_detector, telegram_manager)
     def on_signal(self, signal: InstitutionalSignal)
     def on_position_update(self, position)
     def format_signal_alert(self, signal)
-```
+\`\`\`
 
 #### 5. **Telegram Manager → Bot API** ✅
 **Status:** Operational (mock callbacks)
@@ -443,14 +443,14 @@ class SniperTelegramConnector:
 ### Testing Signal Flow:
 
 **Method 1: Unit Testing**
-```bash
+\`\`\`bash
 pytest tests/test_telegram_integration.py -v
-```
+\`\`\`
 
 **Method 2: Integration Testing**
-```bash
+\`\`\`bash
 python sniper_telegram_connector.py  # Example usage included
-```
+\`\`\`
 
 **Method 3: End-to-End Testing** (⌛ Pending RUN 12)
 - Deploy webhook handler
@@ -554,7 +554,7 @@ python sniper_telegram_connector.py  # Example usage included
 
 ### Progress Trend:
 
-```
+\`\`\`
 RUN 1-5:   Foundation & Core (20%)
 RUN 6-10:  Integration & Features (50%)
 RUN 11:    Telegram Complete (65%)
@@ -562,7 +562,7 @@ RUN 12:    Status & Verification (72%)
 Target:    Production Ready (100%)
 
 Progress: [██████████████░░░░░░] 72%
-```
+\`\`\`
 
 ---
 
@@ -632,32 +632,32 @@ Progress: [██████████████░░░░░░] 72%
 ### Quick Start:
 
 **Step 1: Configure Environment**
-```bash
+\`\`\`bash
 cp .env.example .env
 # Edit .env with your values:
 # TELEGRAM_BOT_TOKEN=your_bot_token
 # TELEGRAM_CHAT_ID=your_chat_id
-```
+\`\`\`
 
 **Step 2: Install Dependencies**
-```bash
+\`\`\`bash
 pip install python-telegram-bot requests
-```
+\`\`\`
 
 **Step 3: Test Bot**
-```bash
+\`\`\`bash
 python telegram_integration/bot_config.py
-```
+\`\`\`
 
 **Step 4: Run Integration Tests**
-```bash
+\`\`\`bash
 pytest tests/test_telegram_integration.py -v
-```
+\`\`\`
 
 **Step 5: Deploy Webhook** (⌛ RUN 12)
-```bash
+\`\`\`bash
 python telegram_integration/webhook_handler.py
-```
+\`\`\`
 
 ### Full deployment guide coming in RUN 12.
 

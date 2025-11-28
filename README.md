@@ -405,13 +405,13 @@ Performance is a core concern in the trading engine. This project includes compr
 - **Read the [Optimization Checklist](OPTIMIZATION.md)** for comprehensive performance guidelines
 - **Review [Contributing Guidelines](.github/CONTRIBUTING.md)** for optimization-focused PR process
 - **Use [Profiling Script](scripts/profile.py)** to measure performance:
-  ```bash
+  \`\`\`bash
   python scripts/profile.py --module trading --function main_loop --save
-  ```
+  \`\`\`
 - **Run Benchmarks**:
-  ```bash
+  \`\`\`bash
   pytest tests/benchmarks/ -v --benchmark-disable-gc
-  ```
+  \`\`\`
 
 ### Key Focus Areas
 

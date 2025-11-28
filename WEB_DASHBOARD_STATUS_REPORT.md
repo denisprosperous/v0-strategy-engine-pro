@@ -31,7 +31,7 @@ I've built a **full-featured, mobile-friendly web dashboard** for your trading b
 - ✅ API documentation (auto-generated)
 
 **Endpoints:**
-```
+\`\`\`
 GET  /                          # API root
 POST /api/auth/login            # User login
 GET  /api/status                # Bot status
@@ -44,7 +44,7 @@ POST /api/bot/stop              # Stop bot
 POST /api/bot/mode              # Change mode
 WS   /ws                        # WebSocket connection
 GET  /health                    # Health check
-```
+\`\`\`
 
 ---
 
@@ -222,18 +222,18 @@ GET  /health                    # Health check
 
 ### **Step 1: Install Dependencies**
 
-```bash
+\`\`\`bash
 pip install -r requirements-dashboard.txt
-```
+\`\`\`
 
 ### **Step 2: Start Backend**
 
-```bash
+\`\`\`bash
 python api/main.py
 
 # Or with uvicorn
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
-```
+\`\`\`
 
 **Backend runs at:** http://localhost:8000
 
@@ -242,22 +242,22 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ### **Step 3: Open Dashboard**
 
 **Option A: Direct File**
-```bash
+\`\`\`bash
 open dashboard/index.html
-```
+\`\`\`
 
 **Option B: Python Server**
-```bash
+\`\`\`bash
 cd dashboard
 python -m http.server 3000
 # Open http://localhost:3000
-```
+\`\`\`
 
 **Option C: Node Server**
-```bash
+\`\`\`bash
 npx http-server dashboard -p 3000
 # Open http://localhost:3000
-```
+\`\`\`
 
 ### **Step 4: Login**
 
@@ -494,7 +494,7 @@ npx http-server dashboard -p 3000
 
 🚀 **Test it now!**
 
-```bash
+\`\`\`bash
 # 1. Install
 pip install -r requirements-dashboard.txt
 
@@ -507,7 +507,7 @@ open dashboard/index.html
 # 4. Login
 # Username: admin
 # Password: changeme
-```
+\`\`\`
 
 ---
 

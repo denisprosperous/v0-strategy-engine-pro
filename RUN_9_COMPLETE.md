@@ -19,7 +19,7 @@ A comprehensive historical data gap detection and filling system that ensures ti
 ### 1. **backfill_manager.py** (500+ LOC)
 
 #### Core Architecture:
-```python
+\`\`\`python
 class BackfillManager:
     """
     Comprehensive gap detection and filling system:
@@ -29,13 +29,13 @@ class BackfillManager:
     - Validates data continuity
     - Auto-recovers on startup
     """
-```
+\`\`\`
 
 #### Key Components:
 
 **A. Data Structures**
 
-```python
+\`\`\`python
 @dataclass
 class DataGap:
     symbol: str
@@ -53,7 +53,7 @@ class BackfillJob:
     status: BackfillStatus  # PENDING/IN_PROGRESS/COMPLETED/FAILED
     filled_candles: int
     total_candles: int
-```
+\`\`\`
 
 **B. Gap Detection Engine**
 - ✅ Time-series gap identification
@@ -75,10 +75,10 @@ class BackfillJob:
 - ✅ Priority-based execution (critical first)
 
 **D. Startup Auto-Recovery**
-```python
+\`\`\`python
 def auto_recover_on_startup(symbols, exchange, timeframe, lookback_days):
     """Automatically detect and fill gaps on system startup."""
-```
+\`\`\`
 - ✅ Automatic gap detection
 - ✅ Job creation and execution
 - ✅ No manual intervention required
@@ -90,7 +90,7 @@ def auto_recover_on_startup(symbols, exchange, timeframe, lookback_days):
 - ✅ Expected candle count calculation
 
 **F. Status Reporting**
-```python
+\`\`\`python
 def get_status_summary() -> Dict:
     """Returns:
     - Active jobs count
@@ -98,7 +98,7 @@ def get_status_summary() -> Dict:
     - Detected gaps count
     - Job progress details
     """
-```
+\`\`\`
 
 ---
 
@@ -166,24 +166,24 @@ def get_status_summary() -> Dict:
 ## 📊 PROGRESS METRICS
 
 ### Before Run #9:
-```
+\`\`\`
 Data Layer: 65%
 [=============================-----] 65%
 ✅ Encrypted Database (10%)
 ✅ Redis Caching (12%)
 ✅ Data Validation (8%)
 ⏳ Backfill Mechanism (5%) ← PENDING
-```
+\`\`\`
 
 ### After Run #9:
-```
+\`\`\`
 Data Layer: 70% 🎯 TARGET ACHIEVED!
 [==================================] 70%
 ✅ Encrypted Database (10%)
 ✅ Redis Caching (12%)
 ✅ Data Validation (8%)
 ✅ Backfill Mechanism (5%) ← COMPLETE!
-```
+\`\`\`
 
 ---
 
@@ -235,7 +235,7 @@ Data Layer: 70% 🎯 TARGET ACHIEVED!
 
 ## 🔄 BACKFILL FLOW DIAGRAM
 
-```
+\`\`\`
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃  BACKFILL MANAGER                 ┃
 ┃  (Run #9 - Complete)              ┃
@@ -281,7 +281,7 @@ Data Layer: 70% 🎯 TARGET ACHIEVED!
        └──────────┬──────────┘
                   ┃
           [✓] Data Complete
-```
+\`\`\`
 
 ---
 
@@ -354,7 +354,7 @@ Data Layer: 70% 🎯 TARGET ACHIEVED!
 
 ### 🏆 DUAL TARGET ACHIEVEMENT!
 
-```
+\`\`\`
 ┌─────────────────────────────────────────┐
 │  TIER 1 IMPLEMENTATION STATUS           │
 ├─────────────────────────────────────────┤
@@ -368,7 +368,7 @@ Data Layer: 70% 🎯 TARGET ACHIEVED!
 │  Overall Progress:     77.5%            │
 │  Status: BOTH TARGETS ACHIEVED! 🎉      │
 └─────────────────────────────────────────┘
-```
+\`\`\`
 
 **What's Fully Operational:**
 - ✅ **Data Infrastructure**: Complete historical and real-time data management

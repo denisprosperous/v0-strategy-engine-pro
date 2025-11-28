@@ -120,7 +120,7 @@ See `/tests/benchmarks/` for pytest-based performance tests.
 
 ### Running Profiling
 
-```bash
+\`\`\`bash
 # Profile main trading loop
 python scripts/profile.py --module trading --function main_loop
 
@@ -129,7 +129,7 @@ python scripts/profile.py --module analytics --function compute_metrics
 
 # Run benchmark suite
 pytest tests/benchmarks/ -v --benchmark-disable-gc
-```
+\`\`\`
 
 ---
 

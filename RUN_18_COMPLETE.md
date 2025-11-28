@@ -22,7 +22,7 @@ Successfully integrated all core components into the main application with compl
 - ✅ **Async/Await**: Full asynchronous architecture
 
 **Architecture**:
-```python
+\`\`\`python
 class StrategyEnginePro:
     - initialize_exchanges()         # Load all 10 exchanges
     - initialize_trading_components() # Signal/Risk/Mode managers
@@ -32,7 +32,7 @@ class StrategyEnginePro:
     - _performance_tracker()         # Performance reporting
     - _signal_processor()            # Signal handling
     - stop_services()                # Graceful shutdown
-```
+\`\`\`
 
 **Lines**: 700+ lines of production-ready code
 
@@ -52,7 +52,7 @@ class StrategyEnginePro:
 - ✅ **Default Values**: Sensible defaults for all settings
 
 **Configuration Classes**:
-```python
+\`\`\`python
 @dataclass
 class ExchangeCredentials:
     api_key: Optional[str]
@@ -68,7 +68,7 @@ class Settings:
     # Risk management
     # Telegram/Database/Redis
     # Logging/API server
-```
+\`\`\`
 
 **Lines**: 400+ lines
 
@@ -112,7 +112,7 @@ class Settings:
 - ✅ **Risk parameters** centralized
 
 ### 🏗️ Architecture Improvements
-```
+\`\`\`
 v0-strategy-engine-pro/
 ├── main.py                    # ✅ Main orchestrator (updated)
 ├── config/
@@ -127,7 +127,7 @@ v0-strategy-engine-pro/
 │   └── manager.py           # ✅ Risk management
 ├── telegram_integration/    # ✅ Telegram/Webhooks
 └── .env.example             # ✅ Config template
-```
+\`\`\`
 
 ---
 
@@ -160,7 +160,7 @@ v0-strategy-engine-pro/
 ## 🚀 Application Flow
 
 ### Startup Sequence:
-```
+\`\`\`
 1. Load .env variables
 2. Initialize logging
 3. Create StrategyEnginePro instance
@@ -175,10 +175,10 @@ v0-strategy-engine-pro/
    - Webhook handler (optional)
 8. Enter main loop
 9. Wait for shutdown signal
-```
+\`\`\`
 
 ### Signal Processing Flow:
-```
+\`\`\`
 TradingView Signal
   ↓
 Webhook Receiver
@@ -199,10 +199,10 @@ Signal Processor
   Order Execution
       ↓
   Telegram Notification
-```
+\`\`\`
 
 ### Shutdown Sequence:
-```
+\`\`\`
 1. Receive signal (SIGINT/SIGTERM)
 2. Set shutdown_event
 3. Stop trading (mode_manager)
@@ -211,14 +211,14 @@ Signal Processor
 6. Disconnect all exchanges
 7. Send final Telegram notification
 8. Exit cleanly
-```
+\`\`\`
 
 ---
 
 ## ⚙️ Configuration Examples
 
 ### Minimal Configuration (Demo Mode):
-```bash
+\`\`\`bash
 # .env
 TRADING_MODE=demo
 ENABLE_DEMO_MODE=true
@@ -231,10 +231,10 @@ BINANCE_API_SECRET=your_secret
 # Telegram (optional but recommended)
 TELEGRAM_BOT_TOKEN=your_token
 TELEGRAM_CHAT_ID=your_chat_id
-```
+\`\`\`
 
 ### Production Configuration (Live Trading):
-```bash
+\`\`\`bash
 # .env
 APP_ENV=production
 TRADING_MODE=semi_auto
@@ -259,14 +259,14 @@ TELEGRAM_WEBHOOK_URL=https://yourdomain.com/webhook
 # AI (optional)
 OPENAI_API_KEY=sk-your_key
 AI_PRIMARY_MODEL=openai
-```
+\`\`\`
 
 ---
 
 ## 📝 Usage Examples
 
 ### Example 1: Start in Demo Mode
-```bash
+\`\`\`bash
 # Configure .env
 echo "TRADING_MODE=demo" >> .env
 echo "ENABLE_DEMO_MODE=true" >> .env
@@ -274,10 +274,10 @@ echo "DEMO_INITIAL_BALANCE=10000" >> .env
 
 # Run
 python main.py
-```
+\`\`\`
 
 ### Example 2: Run Backtest
-```bash
+\`\`\`bash
 # Configure .env
 echo "TRADING_MODE=backtest" >> .env
 echo "ENABLE_BACKTESTING=true" >> .env
@@ -286,10 +286,10 @@ echo "BACKTEST_END_DATE=2024-12-31" >> .env
 
 # Run
 python main.py
-```
+\`\`\`
 
 ### Example 3: Production Deployment
-```bash
+\`\`\`bash
 # Set environment
 export APP_ENV=production
 export TRADING_MODE=semi_auto
@@ -299,7 +299,7 @@ pm2 start main.py --name trading-engine
 
 # Or with Docker
 docker-compose up -d
-```
+\`\`\`
 
 ---
 

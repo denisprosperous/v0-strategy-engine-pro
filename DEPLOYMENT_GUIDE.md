@@ -28,7 +28,7 @@ Comprehensive deployment guide for the trading bot with Telegram integration.
 
 ### Required Software
 
-```bash
+\`\`\`bash
 # Update system
 sudo apt update && sudo apt upgrade -y
 
@@ -45,7 +45,7 @@ sudo apt install docker-compose-plugin -y
 
 # Install Git
 sudo apt install git -y
-```
+\`\`\`
 
 ### Exchange API Access
 
@@ -64,23 +64,23 @@ sudo apt install git -y
 
 ### 1. Clone Repository
 
-```bash
+\`\`\`bash
 git clone https://github.com/denisprosperous/v0-strategy-engine-pro.git
 cd v0-strategy-engine-pro
-```
+\`\`\`
 
 ### 2. Create Environment File
 
-```bash
+\`\`\`bash
 cp .env.example .env
 nano .env  # or use your preferred editor
-```
+\`\`\`
 
 ### 3. Configure Environment Variables
 
 Edit `.env` with your settings:
 
-```bash
+\`\`\`bash
 # ==========================================
 # APPLICATION SETTINGS
 # ==========================================
@@ -153,7 +153,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/trading_bot
 # REDIS (Optional - for caching)
 # ==========================================
 REDIS_URL=redis://localhost:6379/0
-```
+\`\`\`
 
 ---
 
@@ -163,7 +163,7 @@ REDIS_URL=redis://localhost:6379/0
 
 #### 1. Start Services
 
-```bash
+\`\`\`bash
 # Build and start all services
 docker-compose up -d
 
@@ -172,23 +172,23 @@ docker-compose logs -f
 
 # Check status
 docker-compose ps
-```
+\`\`\`
 
 #### 2. Stop Services
 
-```bash
+\`\`\`bash
 docker-compose down
-```
+\`\`\`
 
 #### 3. Restart Services
 
-```bash
+\`\`\`bash
 docker-compose restart
-```
+\`\`\`
 
 ### Option 2: Using Docker Only
 
-```bash
+\`\`\`bash
 # Build image
 docker build -t trading-bot:latest .
 
@@ -208,7 +208,7 @@ docker stop trading-bot
 
 # Remove container
 docker rm trading-bot
-```
+\`\`\`
 
 ---
 
@@ -216,34 +216,34 @@ docker rm trading-bot
 
 ### 1. Create Virtual Environment
 
-```bash
+\`\`\`bash
 python3.11 -m venv venv
 source venv/bin/activate
-```
+\`\`\`
 
 ### 2. Install Dependencies
 
-```bash
+\`\`\`bash
 pip install --upgrade pip
 pip install -r requirements.txt
-```
+\`\`\`
 
 ### 3. Run Application
 
-```bash
+\`\`\`bash
 # Using the start script
 chmod +x start.sh
 ./start.sh
 
 # Or run directly
 python main.py
-```
+\`\`\`
 
 ### 4. Setup Systemd Service (Production)
 
 Create `/etc/systemd/system/trading-bot.service`:
 
-```ini
+\`\`\`ini
 [Unit]
 Description=v0 Strategy Engine Pro - Trading Bot
 After=network.target
@@ -262,11 +262,11 @@ StandardError=append:/var/log/trading-bot/error.log
 
 [Install]
 WantedBy=multi-user.target
-```
+\`\`\`
 
 ### 5. Enable and Start Service
 
-```bash
+\`\`\`bash
 # Create log directory
 sudo mkdir -p /var/log/trading-bot
 sudo chown $USER:$USER /var/log/trading-bot
@@ -285,7 +285,7 @@ sudo systemctl status trading-bot
 
 # View logs
 sudo journalctl -u trading-bot -f
-```
+\`\`\`
 
 ---
 
@@ -305,7 +305,7 @@ sudo journalctl -u trading-bot -f
 
 #### Option A: Using Ngrok (for testing)
 
-```bash
+\`\`\`bash
 # Install ngrok
 wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
 tar -xvzf ngrok-v3-stable-linux-amd64.tgz
@@ -316,11 +316,11 @@ ngrok http 8443
 
 # Copy the HTTPS URL (e.g., https://abc123.ngrok.io)
 # Update .env with WEBHOOK_URL=https://abc123.ngrok.io/webhook
-```
+\`\`\`
 
 #### Option B: Using Domain with SSL (production)
 
-```bash
+\`\`\`bash
 # Install Certbot for Let's Encrypt
 sudo apt install certbot python3-certbot-nginx -y
 
@@ -329,11 +329,11 @@ sudo certbot --nginx -d yourdomain.com
 
 # Configure Nginx reverse proxy
 sudo nano /etc/nginx/sites-available/trading-bot
-```
+\`\`\`
 
 Add this configuration:
 
-```nginx
+\`\`\`nginx
 server {
     listen 443 ssl;
     server_name yourdomain.com;
@@ -353,18 +353,18 @@ server {
         proxy_pass http://localhost:8443/health;
     }
 }
-```
+\`\`\`
 
-```bash
+\`\`\`bash
 # Enable site
 sudo ln -s /etc/nginx/sites-available/trading-bot /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
-```
+\`\`\`
 
 ### 3. Register Webhook with Telegram
 
-```bash
+\`\`\`bash
 # Set webhook
 curl -X POST https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook \
   -H "Content-Type: application/json" \
@@ -377,10 +377,10 @@ curl -X POST https://api.telegram.org/bot<YOUR_BOT_TOKEN>/setWebhook \
 
 # Verify webhook
 curl https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getWebhookInfo
-```
+\`\`\`
 
 Expected response:
-```json
+\`\`\`json
 {
   "ok": true,
   "result": {
@@ -390,7 +390,7 @@ Expected response:
     "max_connections": 40
   }
 }
-```
+\`\`\`
 
 ### 4. Test Bot
 
@@ -405,17 +405,17 @@ Send a message to your bot on Telegram:
 
 ### 1. Generate Secure Tokens
 
-```bash
+\`\`\`bash
 # Generate webhook secret token
 openssl rand -hex 32
 
 # Generate API secret (if needed)
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-```
+\`\`\`
 
 ### 2. Firewall Configuration
 
-```bash
+\`\`\`bash
 # Install UFW
 sudo apt install ufw -y
 
@@ -433,17 +433,17 @@ sudo ufw enable
 
 # Check status
 sudo ufw status
-```
+\`\`\`
 
 ### 3. Secure Environment Variables
 
-```bash
+\`\`\`bash
 # Restrict .env file permissions
 chmod 600 .env
 
 # Never commit .env to git
 echo ".env" >> .gitignore
-```
+\`\`\`
 
 ### 4. API Key Security Best Practices
 
@@ -461,7 +461,7 @@ echo ".env" >> .gitignore
 
 ### 1. Log Files Location
 
-```bash
+\`\`\`bash
 # Application logs (if using systemd)
 /var/log/trading-bot/output.log
 /var/log/trading-bot/error.log
@@ -471,7 +471,7 @@ sudo journalctl -u trading-bot -f
 
 # Docker logs
 docker logs -f trading-bot
-```
+\`\`\`
 
 ### 2. Key Metrics to Monitor
 
@@ -489,7 +489,7 @@ docker logs -f trading-bot
 
 ### 3. Set Up Health Check
 
-```bash
+\`\`\`bash
 # Create health check script
 cat > /usr/local/bin/check-trading-bot.sh << 'EOF'
 #!/bin/bash
@@ -509,13 +509,13 @@ chmod +x /usr/local/bin/check-trading-bot.sh
 # Add to crontab (check every 5 minutes)
 crontab -e
 # Add: */5 * * * * /usr/local/bin/check-trading-bot.sh
-```
+\`\`\`
 
 ### 4. Setup Log Rotation
 
 Create `/etc/logrotate.d/trading-bot`:
 
-```
+\`\`\`
 /var/log/trading-bot/*.log {
     daily
     missingok
@@ -526,7 +526,7 @@ Create `/etc/logrotate.d/trading-bot`:
     create 0644 ubuntu ubuntu
     sharedscripts
 }
-```
+\`\`\`
 
 ---
 
@@ -536,7 +536,7 @@ Create `/etc/logrotate.d/trading-bot`:
 
 #### 1. Webhook Not Receiving Updates
 
-```bash
+\`\`\`bash
 # Check webhook status
 curl https://api.telegram.org/bot<TOKEN>/getWebhookInfo
 
@@ -551,11 +551,11 @@ curl -X POST https://yourdomain.com/webhook \
   -H "Content-Type: application/json" \
   -H "X-Telegram-Bot-Api-Secret-Token: your_secret" \
   -d '{"update_id": 123, "message": {}}'
-```
+\`\`\`
 
 #### 2. Bot Not Responding
 
-```bash
+\`\`\`bash
 # Check if service is running
 sudo systemctl status trading-bot
 
@@ -567,11 +567,11 @@ sudo systemctl restart trading-bot
 
 # Check application logs
 tail -f /var/log/trading-bot/error.log
-```
+\`\`\`
 
 #### 3. Exchange API Errors
 
-```bash
+\`\`\`bash
 # Test API connectivity
 python3 << 'EOF'
 import ccxt
@@ -586,11 +586,11 @@ try:
 except Exception as e:
     print(f"API Error: {e}")
 EOF
-```
+\`\`\`
 
 #### 4. Permission Errors
 
-```bash
+\`\`\`bash
 # Fix file permissions
 chmod 600 .env
 chmod +x start.sh
@@ -599,11 +599,11 @@ sudo chown -R $USER:$USER /var/log/trading-bot
 # Fix systemd service
 sudo systemctl daemon-reload
 sudo systemctl restart trading-bot
-```
+\`\`\`
 
 #### 5. Docker Container Won't Start
 
-```bash
+\`\`\`bash
 # Check Docker logs
 docker logs trading-bot
 
@@ -614,7 +614,7 @@ docker-compose up -d
 
 # Check resource usage
 docker stats
-```
+\`\`\`
 
 ---
 
@@ -661,7 +661,7 @@ docker stats
 
 ### Create Backup
 
-```bash
+\`\`\`bash
 # Backup configuration
 tar -czf trading-bot-backup-$(date +%Y%m%d).tar.gz \
   .env \
@@ -671,17 +671,17 @@ tar -czf trading-bot-backup-$(date +%Y%m%d).tar.gz \
 
 # Store backup securely
 mv trading-bot-backup-*.tar.gz ~/backups/
-```
+\`\`\`
 
 ### Restore from Backup
 
-```bash
+\`\`\`bash
 # Extract backup
 tar -xzf trading-bot-backup-YYYYMMDD.tar.gz
 
 # Restart service
 sudo systemctl restart trading-bot
-```
+\`\`\`
 
 ---
 
@@ -699,7 +699,7 @@ For issues and questions:
 
 ### Essential Commands
 
-```bash
+\`\`\`bash
 # Start bot
 sudo systemctl start trading-bot
 
@@ -717,7 +717,7 @@ curl https://api.telegram.org/bot<TOKEN>/getWebhookInfo
 
 # Health check
 curl http://localhost:8443/health
-```
+\`\`\`
 
 ### Bot Commands
 

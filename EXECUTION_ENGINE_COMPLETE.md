@@ -8,14 +8,14 @@
 
 ## 📊 Progress Overview
 
-```
+\`\`\`
 Phase: Trading Execution Engine
 Segments: 7/7 (100%)
 Files Created: 7
 Lines of Code: ~1,400+
 Test Coverage: Unit + Integration tests included
 Documentation: Complete usage guide
-```
+\`\`\`
 
 ### Segment Completion Timeline
 
@@ -147,14 +147,14 @@ Documentation: Complete usage guide
 
 ### Step 1: Verify Installation
 
-```bash
+\`\`\`bash
 # Ensure all modules are importable
 python -c "from trading.execution_engine import ExecutionEngine; print('\u2705 Import successful')"
-```
+\`\`\`
 
 ### Step 2: Run Tests
 
-```bash
+\`\`\`bash
 # Run all execution engine tests
 pytest tests/trading/ -v
 
@@ -162,11 +162,11 @@ pytest tests/trading/ -v
 # test_execution_engine.py::TestExecutionEngine::test_signal_validation PASSED
 # test_order_monitor.py::TestOrderMonitor::test_slippage_calculation PASSED
 # ... (all tests should pass)
-```
+\`\`\`
 
 ### Step 3: Configure Environment
 
-```bash
+\`\`\`bash
 # Create .env file
 cat > .env << EOF
 EXECUTION_MODE=paper
@@ -174,11 +174,11 @@ MAX_POSITIONS=10
 MAX_DRAWDOWN_PCT=10.0
 DAILY_LOSS_LIMIT_PCT=2.0
 EOF
-```
+\`\`\`
 
 ### Step 4: Initialize Engine (Paper Trading)
 
-```python
+\`\`\`python
 from trading.execution_engine import ExecutionEngine, ExecutionMode
 from trading.order_manager import OrderManager
 from trading.position_tracker import PositionTracker
@@ -197,11 +197,11 @@ engine = ExecutionEngine(
 
 await engine.start()
 print("✅ Engine started in PAPER mode")
-```
+\`\`\`
 
 ### Step 5: Execute Test Signal
 
-```python
+\`\`\`python
 from trading.execution_engine import TradingSignal, SignalAction
 
 signal = TradingSignal(
@@ -217,20 +217,20 @@ if result.success:
     print("✅ Test signal executed successfully")
 else:
     print(f"❌ Error: {result.error}")
-```
+\`\`\`
 
 ### Step 6: Monitor Performance
 
-```python
+\`\`\`python
 metrics = engine.get_performance_metrics()
 print(f"Success Rate: {metrics['engine']['success_rate']}%")
 print(f"Avg Fill Time: {metrics['monitoring']['speed']['avg_latency_ms']}ms")
 print(f"Avg Slippage: {metrics['monitoring']['slippage']['avg_slippage_pct']}%")
-```
+\`\`\`
 
 ### Step 7: Switch to Live Trading (When Ready)
 
-```python
+\`\`\`python
 # After thorough testing in paper mode
 engine = ExecutionEngine(
     ...
@@ -240,7 +240,7 @@ engine = ExecutionEngine(
 # Verify
 assert engine.execution_mode == ExecutionMode.LIVE
 print("⚠️ Engine in LIVE mode - real money at risk!")
-```
+\`\`\`
 
 ---
 
@@ -260,25 +260,25 @@ print("⚠️ Engine in LIVE mode - real money at risk!")
 ### Optimization Tips
 
 1. **Use Redis for Caching**
-   ```python
+   \`\`\`python
    order_manager = OrderManager(redis_conn=redis_client)
-   ```
+   \`\`\`
 
 2. **Batch Operations**
-   ```python
+   \`\`\`python
    # Submit multiple orders concurrently
    results = await asyncio.gather(*[
        engine.execute_signal(signal, "binance")
        for signal in signals
    ])
-   ```
+   \`\`\`
 
 3. **Optimize Polling**
-   ```python
+   \`\`\`python
    # Monitor uses exponential backoff automatically
    # Fast: 0.5s for active orders
    # Slow: 5s for pending orders
-   ```
+   \`\`\`
 
 ---
 

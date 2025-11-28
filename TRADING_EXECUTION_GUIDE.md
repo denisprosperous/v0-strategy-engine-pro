@@ -18,7 +18,7 @@ The **Trading Execution Engine** is a production-grade orchestration system that
 
 ## Architecture
 
-```
+\`\`\`
 Trading Execution Stack:
 
 ┌─────────────────────────────────────────┐
@@ -46,7 +46,7 @@ Trading Execution Stack:
 │   EXCHANGE ADAPTERS (10+ Exchanges) │
 │   - Binance, Bybit, OKX, KuCoin...  │
 └─────────────────────────────────────┘
-```
+\`\`\`
 
 ---
 
@@ -66,7 +66,7 @@ Trading Execution Stack:
 
 **Usage Example**:
 
-```python
+\`\`\`python
 from trading.execution_engine import ExecutionEngine, TradingSignal, SignalAction
 from trading.execution_models import ExecutionMode
 
@@ -101,7 +101,7 @@ if result.success:
     print(f"Position opened: {result.position.symbol}")
 else:
     print(f"Execution failed: {result.error}")
-```
+\`\`\`
 
 ---
 
@@ -119,7 +119,7 @@ else:
 
 **Usage Example**:
 
-```python
+\`\`\`python
 from trading.order_manager import OrderManager
 from trading.execution_models import ExecutionOrder
 
@@ -145,7 +145,7 @@ if placed_order:
         print(f"Order filled at ${order.average_filled_price}")
     
     order_manager.register_callback("on_filled", on_filled)
-```
+\`\`\`
 
 ---
 
@@ -162,7 +162,7 @@ if placed_order:
 
 **Usage Example**:
 
-```python
+\`\`\`python
 from trading.position_tracker import PositionTracker
 
 position_tracker = PositionTracker()
@@ -184,7 +184,7 @@ position_tracker.update_position_pnl("BTCUSDT", current_price=51000.0)
 stats = position_tracker.get_portfolio_stats()
 print(f"Total PnL: ${stats['total_unrealized_pnl']}")
 print(f"Open Positions: {stats['total_positions']}")
-```
+\`\`\`
 
 ---
 
@@ -201,7 +201,7 @@ print(f"Open Positions: {stats['total_positions']}")
 
 **Usage Example**:
 
-```python
+\`\`\`python
 from trading.risk_guard import RiskGuard
 
 risk_guard = RiskGuard(
@@ -221,7 +221,7 @@ if risk_check["passed"]:
     print("✅ Risk checks passed")
 else:
     print(f"❌ Risk violations: {risk_check['violations']}")
-```
+\`\`\`
 
 ---
 
@@ -238,7 +238,7 @@ else:
 
 **Usage Example**:
 
-```python
+\`\`\`python
 from trading.order_monitor import OrderMonitor
 
 monitor = OrderMonitor(redis_conn=redis_client)
@@ -255,13 +255,13 @@ metrics = monitor.get_metrics_summary()
 
 print(f"Average fill time: {metrics['speed']['avg_latency_ms']}ms")
 print(f"Average slippage: {metrics['slippage']['avg_slippage_pct']}%")
-```
+\`\`\`
 
 ---
 
 ## Complete Integration Example
 
-```python
+\`\`\`python
 import asyncio
 from trading.execution_engine import ExecutionEngine, TradingSignal, SignalAction
 from trading.execution_models import ExecutionMode
@@ -338,7 +338,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-```
+\`\`\`
 
 ---
 
@@ -348,7 +348,7 @@ if __name__ == "__main__":
 
 Automatically halts trading when dangerous conditions are detected:
 
-```python
+\`\`\`python
 # Manual activation
 engine.activate_circuit_breaker("high_volatility")
 
@@ -359,24 +359,24 @@ engine.activate_circuit_breaker("high_volatility")
 
 # Deactivate when safe
 engine.deactivate_circuit_breaker()
-```
+\`\`\`
 
 ### Emergency Stop
 
 Instantly close all positions and cancel all orders:
 
-```python
+\`\`\`python
 results = await engine.emergency_stop_all()
 
 print(f"Cancelled orders: {len(results['cancelled_orders'])}")
 print(f"Closed positions: {len(results['closed_positions'])}")
-```
+\`\`\`
 
 ---
 
 ## Performance Metrics
 
-```python
+\`\`\`python
 metrics = engine.get_performance_metrics()
 
 print(metrics)
@@ -407,7 +407,7 @@ print(metrics)
 #     },
 #   },
 # }
-```
+\`\`\`
 
 ---
 
@@ -415,34 +415,34 @@ print(metrics)
 
 ### 1. Always Start with Paper Trading
 
-```python
+\`\`\`python
 # Test your strategies first!
 execution_mode=ExecutionMode.PAPER
-```
+\`\`\`
 
 ### 2. Set Conservative Risk Limits
 
-```python
+\`\`\`python
 risk_guard = RiskGuard(
     max_positions=5,           # Don't overtrade
     max_drawdown_pct=10.0,     # Protect capital
     daily_loss_limit_pct=2.0,  # Small daily losses
 )
-```
+\`\`\`
 
 ### 3. Monitor Execution Quality
 
-```python
+\`\`\`python
 # Check slippage regularly
 slippage_metrics = order_monitor.get_slippage_metrics()
 
 if slippage_metrics["avg_slippage_pct"] > 0.5:  # 0.5%
     print("⚠️ High slippage detected - review order types")
-```
+\`\`\`
 
 ### 4. Use Stop Losses
 
-```python
+\`\`\`python
 # Always include stop losses
 signal = TradingSignal(
     symbol="BTCUSDT",
@@ -451,11 +451,11 @@ signal = TradingSignal(
     stop_loss=48000.0,  # ✅ Always set
     take_profit=52000.0,
 )
-```
+\`\`\`
 
 ### 5. Handle Errors Gracefully
 
-```python
+\`\`\`python
 try:
     result = await engine.execute_signal(signal, "binance")
     if not result.success:
@@ -464,7 +464,7 @@ try:
 except Exception as e:
     logger.critical(f"Critical error: {e}")
     await engine.emergency_stop_all()
-```
+\`\`\`
 
 ---
 
@@ -478,13 +478,13 @@ except Exception as e:
 - Exchange API issues
 
 **Solution**:
-```python
+\`\`\`python
 # Use market orders for urgent fills
 order_type="MARKET"
 
 # Or widen limit price
 price = current_price * 1.001  # 0.1% above market for buys
-```
+\`\`\`
 
 ### Issue: High Slippage
 
@@ -494,12 +494,12 @@ price = current_price * 1.001  # 0.1% above market for buys
 - High market volatility
 
 **Solution**:
-```python
+\`\`\`python
 # Split large orders
 for chunk in split_order(total_quantity, num_chunks=5):
     await execute_signal(chunk)
     await asyncio.sleep(30)  # Time delay
-```
+\`\`\`
 
 ### Issue: Risk Checks Failing
 
@@ -509,7 +509,7 @@ for chunk in split_order(total_quantity, num_chunks=5):
 - Daily loss limit hit
 
 **Solution**:
-```python
+\`\`\`python
 # Check risk status
 risk_status = risk_guard.get_risk_status()
 print(risk_status)
@@ -517,7 +517,7 @@ print(risk_status)
 # Close some positions or wait for recovery
 if risk_status["current_drawdown_pct"] > 8.0:
     await engine.close_position(worst_performer, reason="reduce_risk")
-```
+\`\`\`
 
 ---
 
@@ -525,7 +525,7 @@ if risk_status["current_drawdown_pct"] > 8.0:
 
 Run the test suite:
 
-```bash
+\`\`\`bash
 # Run all tests
 pytest tests/trading/ -v
 
@@ -534,7 +534,7 @@ pytest tests/trading/test_execution_engine.py -v
 
 # Run with coverage
 pytest tests/trading/ --cov=trading --cov-report=html
-```
+\`\`\`
 
 ---
 
@@ -542,7 +542,7 @@ pytest tests/trading/ --cov=trading --cov-report=html
 
 ### 1. Environment Variables
 
-```bash
+\`\`\`bash
 # .env
 EXECUTION_MODE=live  # paper, demo, or live
 MAX_POSITIONS=10
@@ -552,11 +552,11 @@ DAILY_LOSS_LIMIT_PCT=2.0
 # Exchange API keys (encrypted)
 BINANCE_API_KEY=encrypted_key
 BINANCE_API_SECRET=encrypted_secret
-```
+\`\`\`
 
 ### 2. Monitoring
 
-```python
+\`\`\`python
 # Send metrics to Grafana/Prometheus
 from prometheus_client import Gauge, Counter
 
@@ -567,11 +567,11 @@ position_pnl = Gauge('position_pnl', 'Total portfolio PnL')
 metrics = engine.get_performance_metrics()
 execution_success_rate.set(metrics['engine']['success_rate'])
 position_pnl.set(metrics['positions']['total_unrealized_pnl'])
-```
+\`\`\`
 
 ### 3. Logging
 
-```python
+\`\`\`python
 import logging
 
 logging.basicConfig(
@@ -582,7 +582,7 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-```
+\`\`\`
 
 ---
 

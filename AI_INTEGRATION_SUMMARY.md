@@ -104,7 +104,7 @@ Successfully integrated a multi-provider AI ensemble system into the v0-strategy
 
 ## 🏗️ Architecture
 
-```
+\`\`\`
 ┌──────────────────────────────────────────────────────┐
 │              Main Trading Application                │
 │                 (Your App Entry)                     │
@@ -154,7 +154,7 @@ Successfully integrated a multi-provider AI ensemble system into the v0-strategy
    │Provider │  │Provider │  │Provider │
    └─────────┘  └─────────┘  └─────────┘
         +8 more providers available
-```
+\`\`\`
 
 ---
 
@@ -162,7 +162,7 @@ Successfully integrated a multi-provider AI ensemble system into the v0-strategy
 
 ### **1. Set Environment Variables**
 
-```bash
+\`\`\`bash
 # Copy and configure
 export AI_ENABLED=true
 export AI_MIN_PROVIDERS=2
@@ -172,21 +172,21 @@ export AI_MIN_CONFIDENCE=0.6
 export OPENAI_API_KEY="sk-..."
 export ANTHROPIC_API_KEY="sk-ant-..."
 export GOOGLE_API_KEY="AI..."
-```
+\`\`\`
 
 ### **2. Run Example**
 
-```bash
+\`\`\`bash
 # Make executable
 chmod +x examples/ai_enhanced_trading_example.py
 
 # Run
 python examples/ai_enhanced_trading_example.py
-```
+\`\`\`
 
 ### **3. Integrate into Your App**
 
-```python
+\`\`\`python
 import asyncio
 from signal_generation.signal_engine_ai_enhanced import AIEnhancedSignalEngine
 
@@ -211,7 +211,7 @@ async def main():
             print(f"AI agreed: {signal.ai_metadata['ai_signal']}")
 
 asyncio.run(main())
-```
+\`\`\`
 
 ---
 
@@ -219,9 +219,9 @@ asyncio.run(main())
 
 ### **Unit Tests**
 
-```bash
+\`\`\`bash
 pytest tests/test_ai_integration.py -v
-```
+\`\`\`
 
 **Test Coverage:**
 - ✅ Configuration loading (env vars, files)
@@ -340,11 +340,11 @@ All modules include:
 ### **Immediate**
 
 1. **Test with Real API Keys**
-   ```bash
+   \`\`\`bash
    # Set your keys and run
    export OPENAI_API_KEY="your-key"
    python examples/ai_enhanced_trading_example.py
-   ```
+   \`\`\`
 
 2. **Monitor Performance**
    - Check latency metrics

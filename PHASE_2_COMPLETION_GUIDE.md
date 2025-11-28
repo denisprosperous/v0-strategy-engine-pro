@@ -15,15 +15,15 @@
 **Purpose:** Field-level encryption for sensitive data
 
 **Components:**
-```python
+\`\`\`python
 - EncryptionManager         # Singleton encryption/decryption
 - EncryptedString          # SQLAlchemy TypeDecorator (auto-encrypt strings)
 - EncryptedJSON            # SQLAlchemy TypeDecorator (auto-encrypt JSON)
 - EncryptionHelper         # Utilities (key rotation, encryption detection)
-```
+\`\`\`
 
 **Usage Example:**
-```python
+\`\`\`python
 from database.encrypted_fields import EncryptedString, EncryptedJSON
 from sqlalchemy import Column, String
 
@@ -31,7 +31,7 @@ class User(Base):
     __tablename__ = 'users_v2'
     api_keys = Column(EncryptedJSON, default=dict)  # Auto-encrypted
     password = Column(EncryptedString)               # Auto-encrypted
-```
+\`\`\`
 
 ### 2. models_v2.py (330+ lines) ✅
 **Location:** `database/models_v2.py`  
@@ -64,7 +64,7 @@ class User(Base):
 
 ## Current Architecture
 
-```
+\`\`\`
 v0-strategy-engine-pro/
 ├── database/
 │   ├── __init__.py
@@ -82,7 +82,7 @@ v0-strategy-engine-pro/
 │   ├── crypto_vault.py       # 50% complete
 │   └── ...
 └── ...
-```
+\`\`\`
 
 ---
 
@@ -95,9 +95,9 @@ v0-strategy-engine-pro/
    - Setup migration environment
 
 2. **Auto-Generate Migrations**
-   ```bash
+   \`\`\`bash
    alembic revision --autogenerate -m "Initial models_v2 schema"
-   ```
+   \`\`\`
 
 3. **Create Migration Scripts**
    - Version tracking table
@@ -107,13 +107,13 @@ v0-strategy-engine-pro/
 ### Migration Manager (Starter Code Ready)
 **File:** `database/migrations/__init__.py` (created, ready to commit)
 
-```python
+\`\`\`python
 class MigrationManager:
     def get_current_version()
     def init_database()
     def get_migration_history()
     def get_database_info()
-```
+\`\`\`
 
 ---
 
@@ -137,7 +137,7 @@ class MigrationManager:
    - 2FA integration
 
 ### Suggested Implementation:
-```python
+\`\`\`python
 # database/session_manager.py
 class SessionManager:
     def create_session(user_id, ip_address, user_agent)
@@ -145,7 +145,7 @@ class SessionManager:
     def refresh_token(refresh_token)
     def revoke_session(session_id)
     def cleanup_expired_sessions()
-```
+\`\`\`
 
 ---
 
@@ -162,7 +162,7 @@ class SessionManager:
 ## Encryption Implementation Details
 
 ### How It Works:
-```python
+\`\`\`python
 # Automatic encryption on write
 user = User()
 user.api_keys = {"binance": "secret_key"}  # AUTO-ENCRYPTED before DB write
@@ -170,7 +170,7 @@ user.api_keys = {"binance": "secret_key"}  # AUTO-ENCRYPTED before DB write
 # Automatic decryption on read
 retrieved_user = db.query(User).first()
 print(retrieved_user.api_keys)  # AUTO-DECRYPTED from DB
-```
+\`\`\`
 
 ### Encryption Key Management:
 - **Environment Variable:** `ENCRYPTION_KEY`
@@ -215,7 +215,7 @@ print(retrieved_user.api_keys)  # AUTO-DECRYPTED from DB
 
 ## Quick Reference: File Locations
 
-```
+\`\`\`
 Encrypted Fields:
   → database/encrypted_fields.py
 
@@ -232,7 +232,7 @@ Execution Engine (Complete):
 API Security (50%):
   → security/crypto_vault.py
   → security/key_manager.py
-```
+\`\`\`
 
 ---
 
@@ -275,7 +275,7 @@ API Security (50%):
 
 ## Commands Reference
 
-```bash
+\`\`\`bash
 # Initialize database
 from database.database import init_db
 init_db()
@@ -294,7 +294,7 @@ db = SessionLocal()
 from database.models_v2 import User, Trade
 user = db.query(User).filter_by(username="admin").first()
 trades = db.query(Trade).filter_by(user_id=user.id).all()
-```
+\`\`\`
 
 ---
 

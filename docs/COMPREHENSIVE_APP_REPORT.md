@@ -28,7 +28,7 @@ v0-strategy-engine-pro is a **professional-grade AI-enhanced cryptocurrency trad
 
 ### **Core Modules**
 
-```
+\`\`\`
 v0-strategy-engine-pro/
 ├── ai_models/                    # AI ensemble system
 │   ├── providers/               # 8 AI provider wrappers
@@ -45,7 +45,7 @@ v0-strategy-engine-pro/
 ├── trading_mode_manager.py       # Trading modes (manual/semi/auto)
 ├── telegram_integration/         # Telegram alerts
 └── tests/                        # Comprehensive tests
-```
+\`\`\`
 
 ---
 
@@ -348,7 +348,7 @@ v0-strategy-engine-pro/
 
 ### **Signal Generation**
 
-```
+\`\`\`
 Technical-Only Mode:
   Average: 15-50ms
   95th percentile: <100ms
@@ -363,16 +363,16 @@ AI-Enhanced Mode (4 providers):
   Average: 250-500ms
   95th percentile: <800ms
   Throughput: 120+ signals/minute
-```
+\`\`\`
 
 ### **Cache Performance**
 
-```
+\`\`\`
 Expected Cache Hit Rate: 60-80%
 Cache TTL: 300 seconds (5 minutes)
 Latency Reduction: ~90% on cache hits
 Storage: In-memory (negligible footprint)
-```
+\`\`\`
 
 ### **Accuracy Metrics**
 
@@ -404,7 +404,7 @@ Storage: In-memory (negligible footprint)
 
 ### **Dependencies**
 
-```python
+\`\`\`python
 # Core
 aiohttp>=3.8.0
 asyncio>=3.4.3
@@ -425,7 +425,7 @@ pytest-asyncio>=0.18.0
 # Utilities
 python-dotenv>=0.19.0
 tenacity>=8.0.0  # Retry logic
-```
+\`\`\`
 
 ---
 

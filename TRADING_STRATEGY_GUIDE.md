@@ -18,12 +18,12 @@ Fibonacci retracements are proven support/resistance levels based on the Fibonac
 - **78.6% Retracement**: Extreme pullback, last chance entry
 
 #### Dynamic Retracement Calculation
-```
+\`\`\`
 Fib_Level = Swing_High - (Swing_High - Swing_Low) * Ratio
 
 Example: BTC at $50,000 high, $40,000 low
 - 61.8% Fib = $50,000 - ($50,000 - $40,000) * 0.618 = $43,820
-```
+\`\`\`
 
 #### Signal Generation Rules
 1. **Identify Swing Points**: Find local high and low within 20-50 candles
@@ -50,14 +50,14 @@ Example: BTC at $50,000 high, $40,000 low
 - **RSI > 70**: Overbought, suggests caution at high Fib bounces
 
 ### Winning Fibonacci + RSI Combination
-```
+\`\`\`
 SIGNAL CONDITIONS:
 IF (Price at 61.8% Fib) AND (RSI < 30) THEN BUY SIGNAL = VERY STRONG ✓✓✓
 IF (Price at 38.2% Fib) AND (RSI < 40) THEN BUY SIGNAL = STRONG ✓✓
 IF (Price at 50% Fib) AND (RSI < 35) THEN BUY SIGNAL = MODERATE ✓
 
 RISK REWARD: Typically 1:3 to 1:5 (Risk $100, Profit $300-500)
-```
+\`\`\`
 
 ---
 
@@ -69,7 +69,7 @@ RISK REWARD: Typically 1:3 to 1:5 (Risk $100, Profit $300-500)
 3. **EMA-200**: Slow MA, long-term trend
 
 ### Fibonacci + MA Entry Rules
-```
+\`\`\`
 BULLISH SETUP (High Probability):
 - Price > EMA-200 (uptrend confirmed)
 - EMA-20 > EMA-50 > EMA-200 (all aligned)
@@ -85,7 +85,7 @@ BEARISH SETUP (Reversal Trading):
 - Price bounces down from Fib level
 → ENTRY SIGNAL: Sell at Fib level, TARGET: Previous swing low
 → WIN RATE: 68-72% ✓
-```
+\`\`\`
 
 ---
 
@@ -96,12 +96,12 @@ BEARISH SETUP (Reversal Trading):
 - Volume decrease at support = potential false bounce
 
 ### Rules
-```
+\`\`\`
 IF (Price at Fib level) AND (Volume > 1.5x Average) THEN CONFIDENCE += 20%
 IF (Price at Fib level) AND (Volume < 0.8x Average) THEN SKIP SIGNAL
 
 Risk Reduction: Adding volume check reduces false signals by 15-20%
-```
+\`\`\`
 
 ---
 
@@ -110,36 +110,36 @@ Risk Reduction: Adding volume check reduces false signals by 15-20%
 ### Priority-Based Entry Signals (Use In Order)
 
 **TIER 1 - HIGHEST CONFIDENCE (80-85% Win Rate)**
-```
+\`\`\`
 IF (Price bounces at 61.8% Fib) 
    AND (RSI < 30)
    AND (EMA-20 > EMA-50 > EMA-200)
    AND (Volume > 1.5x avg)
 THEN: STRONG_BUY_SIGNAL with 1:4 risk/reward
-```
+\`\`\`
 
 **TIER 2 - HIGH CONFIDENCE (72-78% Win Rate)**
-```
+\`\`\`
 IF (Price bounces at 38.2% Fib)
    AND (RSI 25-35)
    AND (EMA-20 > EMA-50)
    AND (Volume > 1.2x avg)
 THEN: BUY_SIGNAL with 1:3 risk/reward
-```
+\`\`\`
 
 **TIER 3 - MODERATE CONFIDENCE (64-70% Win Rate)**
-```
+\`\`\`
 IF (Price bounces at 50% Fib)
    AND (RSI 20-40)
    AND (Price > EMA-200)
 THEN: CONDITIONAL_BUY with 1:2 risk/reward
-```
+\`\`\`
 
 **TIER 4 - AVOIDANCE (Do Not Trade)**
-```
+\`\`\`
 IF (RSI > 70) OR (RSI < 15) OR (Volume declining) THEN: SKIP
 IF (All MAs not aligned) OR (Conflicting signals) THEN: SKIP
-```
+\`\`\`
 
 ---
 
@@ -171,12 +171,12 @@ IF (All MAs not aligned) OR (Conflicting signals) THEN: SKIP
 ## 7. RISK MANAGEMENT RULES (NON-NEGOTIABLE)
 
 ### Position Sizing
-```
+\`\`\`
 Position_Size = (Account_Balance * Risk_Percentage) / Stop_Loss_Distance
 
 Example: $10,000 account, 2% risk, 1% stop loss
 Position_Size = ($10,000 * 0.02) / 0.01 = $20,000 notional
-```
+\`\`\`
 
 ### Stop Loss Placement
 - **Primary SL**: Below Fib level where entered
@@ -184,11 +184,11 @@ Position_Size = ($10,000 * 0.02) / 0.01 = $20,000 notional
 - **Emergency SL**: Hard 2% account loss limit
 
 ### Take Profit Tiers
-```
+\`\`\`
 1st TP (40% position): At 1x Risk/Reward
 2nd TP (35% position): At 2x Risk/Reward  
 3rd TP (25% position): Trail to breakeven or ride trend
-```
+\`\`\`
 
 ---
 
@@ -204,14 +204,14 @@ Position_Size = ($10,000 * 0.02) / 0.01 = $20,000 notional
 - **Profit Factor**: 2.91x ✓✓
 
 ### Results Summary
-```
+\`\`\`
 Gross Profit:     $47,230
 Gross Loss:      -$16,140
 Net Profit:       $31,090
 Return on Risk:   192.6% ✓✓
 Max Drawdown:     -8.2%
 Sharpe Ratio:     1.87
-```
+\`\`\`
 
 ---
 

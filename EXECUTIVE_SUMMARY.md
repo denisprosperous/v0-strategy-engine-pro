@@ -136,7 +136,7 @@ If your bot improves win rate by just **5%** on **$50k capital**:
 
 ### **Technical Performance**
 
-```
+\`\`\`
 Signal Generation Speed:
   Technical-only: 15-50ms
   AI-enhanced (2 providers): 150-300ms
@@ -149,11 +149,11 @@ Throughput:
 Cache Performance:
   Hit rate: 60-80% (expected)
   Latency reduction: ~90% on hits
-```
+\`\`\`
 
 ### **Expected Trading Performance**
 
-```
+\`\`\`
 Tier 1 Signals:
   Expected win rate: 75-85%
   R:R ratio: 1:4
@@ -168,7 +168,7 @@ Tier 3 Signals:
   Expected win rate: 60-70%
   R:R ratio: 1:2
   Frequency: ~40-50% of signals
-```
+\`\`\`
 
 **Overall Expected Win Rate: 65-75%** (vs 55-65% for typical bots)
 
@@ -265,10 +265,10 @@ Tier 3 Signals:
 ### **DO THIS NOW** ❗
 
 1. ✅ **Test the Example Script**
-   ```bash
+   \`\`\`bash
    export OPENAI_API_KEY="your-key"
    python examples/ai_enhanced_trading_example.py
-   ```
+   \`\`\`
 
 2. ✅ **Read the Documentation**
    - `docs/AI_INTEGRATION_GUIDE.md`
@@ -276,9 +276,9 @@ Tier 3 Signals:
    - `docs/FEATURE_COMPARISON_MATRIX.md`
 
 3. ✅ **Review Test Results**
-   ```bash
+   \`\`\`bash
    pytest tests/test_ai_integration.py -v
-   ```
+   \`\`\`
 
 ### **DO THIS NEXT** ⚠️
 

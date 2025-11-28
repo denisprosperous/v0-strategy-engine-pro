@@ -2,7 +2,7 @@
 
 ## ⚡ Quick Start (30 seconds)
 
-```bash
+\`\`\`bash
 # 1. Install
 pip install python-telegram-bot==20.7 aiohttp==3.9.1
 
@@ -11,61 +11,61 @@ pip install python-telegram-bot==20.7 aiohttp==3.9.1
 # 3. Set & Run
 export TELEGRAM_BOT_TOKEN="your_token"
 python bot.py
-```
+\`\`\`
 
 ---
 
 ## 📝 Commands Cheat Sheet
 
 ### Bot Control
-```
+\`\`\`
 /start          - Welcome message
 /help           - Show all commands
 /status         - Bot status + controls
-```
+\`\`\`
 
 ### Trading Control (Admin Only)
-```
+\`\`\`
 /start_trading  - Start bot
 /stop_trading   - Stop bot
 /mode [mode]    - Set mode: auto | manual | semi
-```
+\`\`\`
 
 ### Portfolio
-```
+\`\`\`
 /balance        - Account balance
 /portfolio      - Open positions
 /exchanges      - Connected exchanges
-```
+\`\`\`
 
 ### Signals & Analysis
-```
+\`\`\`
 /signals [n]    - Show n recent signals
 /analyze [sym]  - AI analysis for symbol
 /sentiment [sym]- Sentiment for symbol
-```
+\`\`\`
 
 ### Performance
-```
+\`\`\`
 /performance    - Performance metrics
 /trades [n]     - Show n recent trades
-```
+\`\`\`
 
 ---
 
 ## ⚙️ Configuration
 
 ### Minimal (.env)
-```bash
+\`\`\`bash
 TELEGRAM_BOT_TOKEN=your_token
-```
+\`\`\`
 
 ### Secure (.env)
-```bash
+\`\`\`bash
 TELEGRAM_BOT_TOKEN=your_token
 TELEGRAM_ALLOWED_USERS=your_user_id
 TELEGRAM_ADMIN_USERS=your_user_id
-```
+\`\`\`
 
 **Get your user ID:** Message `@userinfobot` on Telegram
 
@@ -84,28 +84,28 @@ TELEGRAM_ADMIN_USERS=your_user_id
 ## 🐞 Troubleshooting
 
 **Bot not responding?**
-```bash
+\`\`\`bash
 # Check token
 echo $TELEGRAM_BOT_TOKEN
 
 # Check logs
 tail -f telegram_bot.log
-```
+\`\`\`
 
 **Permission denied?**
-```bash
+\`\`\`bash
 # Add your user ID to .env
 TELEGRAM_ALLOWED_USERS=123456789
-```
+\`\`\`
 
 **API connection failed?**
-```bash
+\`\`\`bash
 # Start backend first
 python api/main.py
 
 # Then start bot
 python bot.py
-```
+\`\`\`
 
 ---
 
@@ -125,7 +125,7 @@ python bot.py
 
 ## 🚀 Deploy to Production
 
-```bash
+\`\`\`bash
 # 1. Set webhook
 TELEGRAM_WEBHOOK_URL=https://your-domain.com
 TELEGRAM_WEBHOOK_PORT=8443
@@ -139,7 +139,7 @@ TELEGRAM_ADMIN_USERS=id1
 
 # 4. Run
 python bot.py
-```
+\`\`\`
 
 ---
 

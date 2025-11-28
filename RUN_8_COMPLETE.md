@@ -19,7 +19,7 @@ The final piece of the Fibonacci Strategy puzzle - a complete signal-to-trade pi
 ### 1. **execution_engine_integrated.py** (450+ LOC)
 
 #### Core Architecture:
-```python
+\`\`\`python
 class IntegratedExecutionEngine:
     """
     Complete signal-to-trade pipeline orchestration:
@@ -28,7 +28,7 @@ class IntegratedExecutionEngine:
     Market Data → Fibonacci Detection → Validation → 
     Scheduling → Scoring → Execution → Management
     """
-```
+\`\`\`
 
 #### Key Components:
 
@@ -40,17 +40,17 @@ class IntegratedExecutionEngine:
 - ✅ **Execution Management**: Order placement and tracking
 
 **B. Pre-Flight Validation**
-```python
+\`\`\`python
 def pre_flight_check(self) -> Tuple[bool, List[str]]:
     """Validate all modules operational before trading."""
-```
+\`\`\`
 - Module initialization checks
 - System health verification
 - Error reporting
 
 **C. Signal Generation Pipeline** (5 Steps)
 
-```
+\`\`\`
 Step 1: Fibonacci Detection
 └─> Dynamic Fibonacci levels from price action
      ↓
@@ -65,7 +65,7 @@ Step 4: Signal Scoring
      ↓
 Step 5: Execution Decision
 └─> Tier-based position sizing
-```
+\`\`\`
 
 **D. Execution Tiers & Position Sizing**
 - **FULL Tier** (≥ 75 score): 100% base position size
@@ -79,17 +79,17 @@ Step 5: Execution Decision
 - Trade state management (open, closed, history)
 
 **F. Trade Management**
-```python
+\`\`\`python
 def update_trades(self, price_map: Dict[str, float]):
     """Real-time trade updates with:
     - P&L calculation
     - Partial exit detection
     - Stop loss monitoring
     """
-```
+\`\`\`
 
 **G. Reporting & Monitoring**
-```python
+\`\`\`python
 def get_summary(self) -> Dict:
     """Returns:
     - Open/closed trade counts
@@ -97,7 +97,7 @@ def get_summary(self) -> Dict:
     - Module status
     - Average performance
     """
-```
+\`\`\`
 
 ---
 
@@ -152,7 +152,7 @@ def get_summary(self) -> Dict:
 ## 📊 PROGRESS METRICS
 
 ### Before Run #8:
-```
+\`\`\`
 Fibonacci Strategy: 80%
 [==================================--] 80%
 ✅ Fibonacci engine (15%)
@@ -160,10 +160,10 @@ Fibonacci Strategy: 80%
 ✅ Smart scheduler (8%)
 ✅ Signal scoring (5%)
 ⏳ Execution integration (5%) ← PENDING
-```
+\`\`\`
 
 ### After Run #8:
-```
+\`\`\`
 Fibonacci Strategy: 85% 🎯 TARGET ACHIEVED!
 [======================================] 85%
 ✅ Fibonacci engine (15%)
@@ -171,7 +171,7 @@ Fibonacci Strategy: 85% 🎯 TARGET ACHIEVED!
 ✅ Smart scheduler (8%)
 ✅ Signal scoring (5%)
 ✅ Execution integration (5%) ← COMPLETE!
-```
+\`\`\`
 
 ---
 
@@ -222,7 +222,7 @@ Fibonacci Strategy: 85% 🎯 TARGET ACHIEVED!
 
 ## 🔄 SIGNAL FLOW DIAGRAM
 
-```
+\`\`\`
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃  INTEGRATED EXECUTION ENGINE       ┃
 ┃  (Run #8 - Complete Pipeline)      ┃
@@ -284,7 +284,7 @@ Fibonacci Strategy: 85% 🎯 TARGET ACHIEVED!
      • TP2: 100% exit
      • SL: Auto-close
      • P&L tracking
-```
+\`\`\`
 
 ---
 

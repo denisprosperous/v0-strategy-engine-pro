@@ -14,7 +14,7 @@ This guide explains how to configure v0 Strategy Engine Pro using environment va
 
 ### 1. Copy Configuration Files
 
-```bash
+\`\`\`bash
 # Copy main configuration
 cp .env.example .env
 
@@ -23,13 +23,13 @@ cat .env.ai.example >> .env
 
 # Optional: Copy backtest configuration if using demo/backtest modes
 cat .env.backtest.example >> .env
-```
+\`\`\`
 
 ### 2. Essential Configuration
 
 Edit `.env` and set these required values:
 
-```bash
+\`\`\`bash
 # Telegram bot (required for notifications)
 TELEGRAM_BOT_TOKEN=your_actual_bot_token
 TELEGRAM_CHAT_ID=your_actual_chat_id
@@ -40,13 +40,13 @@ BINANCE_API_SECRET=your_binance_api_secret
 
 # Trading mode
 TRADING_MODE=demo  # Start with demo mode (no real money)
-```
+\`\`\`
 
 ### 3. Start the Engine
 
-```bash
+\`\`\`bash
 python main.py
-```
+\`\`\`
 
 ---
 
@@ -66,27 +66,27 @@ python main.py
 ### Mode Details
 
 #### Manual Mode
-```bash
+\`\`\`bash
 TRADING_MODE=manual
-```
+\`\`\`
 - **Purpose**: Full control over every trade
 - **How it works**: Engine sends trade signals via Telegram, you execute manually
 - **Best for**: Experienced traders who want automation but maintain control
 - **Risk**: Low (you decide each trade)
 
 #### Semi-Auto Mode
-```bash
+\`\`\`bash
 TRADING_MODE=semi_auto
-```
+\`\`\`
 - **Purpose**: Automated signals with manual confirmation
 - **How it works**: Engine sends signal, you confirm via Telegram, engine executes
 - **Best for**: Traders who want automation but want to approve each trade
 - **Risk**: Medium (automatic execution after confirmation)
 
 #### Auto Mode
-```bash
+\`\`\`bash
 TRADING_MODE=auto
-```
+\`\`\`
 - **Purpose**: Fully automated trading
 - **How it works**: Engine generates and executes trades automatically
 - **Best for**: 24/7 trading without manual intervention
@@ -94,11 +94,11 @@ TRADING_MODE=auto
 - **⚠️ WARNING**: Only use after thorough testing in demo mode!
 
 #### Demo Mode (Recommended for beginners)
-```bash
+\`\`\`bash
 TRADING_MODE=demo
 ENABLE_DEMO_MODE=true
 DEMO_INITIAL_BALANCE=10000
-```
+\`\`\`
 - **Purpose**: Test trade signals WITHOUT risking real money
 - **How it works**: Simulates real trading with virtual funds
 - **Best for**: Testing signals, learning the system, strategy validation
@@ -106,12 +106,12 @@ DEMO_INITIAL_BALANCE=10000
 - **👍 RECOMMENDED**: Always start here!
 
 #### Backtest Mode
-```bash
+\`\`\`bash
 TRADING_MODE=backtest
 ENABLE_BACKTESTING=true
 BACKTEST_START_DATE=2023-01-01
 BACKTEST_END_DATE=2024-12-31
-```
+\`\`\`
 - **Purpose**: Test strategy against historical data
 - **How it works**: Runs strategy on past data to see what would have happened
 - **Best for**: Strategy development, parameter optimization
@@ -128,7 +128,7 @@ Demo trading lets you **test your trade signals in real-time WITHOUT risking any
 
 ### Configuration
 
-```bash
+\`\`\`bash
 # Enable demo mode
 TRADING_MODE=demo
 ENABLE_DEMO_MODE=true
@@ -145,14 +145,14 @@ DEMO_SLIPPAGE=0.001  # Simulates price slippage
 DEMO_TRACK_PERFORMANCE=true
 DEMO_SAVE_HISTORY=true
 DEMO_OUTPUT_DIR=./demo_results
-```
+\`\`\`
 
 ### Demo Trading Workflow
 
 1. **Start engine in demo mode**
-   ```bash
+   \`\`\`bash
    python main.py
-   ```
+   \`\`\`
 
 2. **Engine receives real market data and generates signals**
    - Just like live trading, but executes with virtual funds
@@ -166,9 +166,9 @@ DEMO_OUTPUT_DIR=./demo_results
    - Get daily reports via Telegram
 
 5. **When satisfied with demo results, switch to live**
-   ```bash
+   \`\`\`bash
    TRADING_MODE=semi_auto  # Or manual for more control
-   ```
+   \`\`\`
 
 ### Demo Trading Tips
 
@@ -193,7 +193,7 @@ Backtesting tests your strategy against **historical data** to see how it would 
 
 ### Configuration
 
-```bash
+\`\`\`bash
 # Enable backtesting
 TRADING_MODE=backtest
 ENABLE_BACKTESTING=true
@@ -214,13 +214,13 @@ BACKTEST_TIMEFRAME=1h  # 1-hour candles
 # Generate report
 BACKTEST_GENERATE_REPORT=true
 BACKTEST_OUTPUT_DIR=./backtest_results
-```
+\`\`\`
 
 ### Running a Backtest
 
-```bash
+\`\`\`bash
 python main.py
-```
+\`\`\`
 
 The engine will:
 1. Download historical data for specified symbols and period
@@ -238,12 +238,12 @@ The engine will:
 
 ### Strategy Optimization
 
-```bash
+\`\`\`bash
 # Enable optimization
 BACKTEST_OPTIMIZE=true
 BACKTEST_OPTIMIZATION_METRIC=sharpe_ratio
 BACKTEST_OPTIMIZATION_METHOD=genetic
-```
+\`\`\`
 
 This will automatically find the best strategy parameters.
 
@@ -266,7 +266,7 @@ This will automatically find the best strategy parameters.
 
 ### Quick Setup
 
-```bash
+\`\`\`bash
 # Primary model for analysis
 AI_PRIMARY_MODEL=openai
 OPENAI_API_KEY=sk-your_key_here
@@ -278,16 +278,16 @@ ANTHROPIC_API_KEY=sk-ant-your_key_here
 # Task-specific models
 AI_SENTIMENT_MODEL=perplexity  # Best for real-time news
 PERPLEXITY_API_KEY=your_key_here
-```
+\`\`\`
 
 ### Free Tier Options
 
 **Grok (xAI)** - Free tier available:
-```bash
+\`\`\`bash
 XAI_GROK_API_KEY=your_key
 XAI_GROK_API_TIER=free
 AI_PRIMARY_MODEL=xai_grok
-```
+\`\`\`
 
 For complete AI configuration, see `.env.ai.example`.
 
@@ -324,10 +324,10 @@ For each exchange, you need:
 5. Whitelist your IP address (recommended)
 6. Copy credentials to `.env`:
 
-```bash
+\`\`\`bash
 BINANCE_API_KEY=your_api_key_here
 BINANCE_API_SECRET=your_api_secret_here
-```
+\`\`\`
 
 ### Security Best Practices
 
@@ -349,7 +349,7 @@ BINANCE_API_SECRET=your_api_secret_here
 
 ### Essential Settings
 
-```bash
+\`\`\`bash
 # Position sizing
 DEFAULT_TRADE_SIZE=100  # $100 per trade
 MAX_POSITION_SIZE=1000  # Never more than $1000 per position
@@ -360,36 +360,36 @@ STOP_LOSS_PERCENTAGE=2.0  # 2% stop loss on each trade
 
 # Profit targets
 TAKE_PROFIT_PERCENTAGE=5.0  # 5% take profit
-```
+\`\`\`
 
 ### Recommended Risk Levels
 
 #### Conservative (Recommended for beginners)
-```bash
+\`\`\`bash
 DEFAULT_TRADE_SIZE=100
 MAX_POSITION_SIZE=500  # 5% of $10k portfolio
 MAX_DAILY_LOSS=200  # 2% of $10k portfolio
 STOP_LOSS_PERCENTAGE=1.5
 TAKE_PROFIT_PERCENTAGE=3.0
-```
+\`\`\`
 
 #### Moderate
-```bash
+\`\`\`bash
 DEFAULT_TRADE_SIZE=200
 MAX_POSITION_SIZE=1000  # 10% of $10k portfolio
 MAX_DAILY_LOSS=500  # 5% of $10k portfolio
 STOP_LOSS_PERCENTAGE=2.0
 TAKE_PROFIT_PERCENTAGE=5.0
-```
+\`\`\`
 
 #### Aggressive (⚠️ Higher risk)
-```bash
+\`\`\`bash
 DEFAULT_TRADE_SIZE=500
 MAX_POSITION_SIZE=2000  # 20% of $10k portfolio
 MAX_DAILY_LOSS=1000  # 10% of $10k portfolio
 STOP_LOSS_PERCENTAGE=3.0
 TAKE_PROFIT_PERCENTAGE=8.0
-```
+\`\`\`
 
 ---
 
@@ -429,39 +429,39 @@ TAKE_PROFIT_PERCENTAGE=8.0
 ### Common Issues
 
 #### "API connection failed"
-```bash
+\`\`\`bash
 # Check:
 1. API keys are correct
 2. IP is whitelisted on exchange
 3. API has trading permissions
 4. Exchange is not under maintenance
-```
+\`\`\`
 
 #### "Insufficient balance"
-```bash
+\`\`\`bash
 # Check:
 1. DEFAULT_TRADE_SIZE < account balance
 2. Account has enough margin (for futures)
 3. Dust amounts blocking trades (min order size)
-```
+\`\`\`
 
 #### "Telegram bot not responding"
-```bash
+\`\`\`bash
 # Check:
 1. TELEGRAM_BOT_TOKEN is correct
 2. TELEGRAM_CHAT_ID is correct
 3. Bot has permission to send messages
 4. /start the bot in Telegram
-```
+\`\`\`
 
 #### "Backtest fails to load data"
-```bash
+\`\`\`bash
 # Check:
 1. BACKTEST_START_DATE < BACKTEST_END_DATE
 2. Exchange has historical data for that period
 3. Symbol names are correct (e.g., BTC/USDT not BTCUSDT)
 4. Internet connection is stable
-```
+\`\`\`
 
 ---
 
@@ -469,7 +469,7 @@ TAKE_PROFIT_PERCENTAGE=8.0
 
 ### Quick Reference
 
-```bash
+\`\`\`bash
 # Essential
 TRADING_MODE=demo|manual|semi_auto|auto|backtest
 TELEGRAM_BOT_TOKEN=your_token
@@ -496,7 +496,7 @@ DEMO_TRACK_PERFORMANCE=true
 BACKTEST_START_DATE=2023-01-01
 BACKTEST_END_DATE=2024-12-31
 BACKTEST_INITIAL_CAPITAL=10000
-```
+\`\`\`
 
 For complete reference, see:
 - `.env.example` - Core configuration

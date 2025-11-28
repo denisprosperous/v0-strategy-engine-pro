@@ -46,7 +46,7 @@ Complete Telegram bot integration for real-time institutional sniper alerts with
 
 Add to your `.env` file:
 
-```bash
+\`\`\`bash
 # Required
 TELEGRAM_BOT_TOKEN=your_bot_token_here
 TELEGRAM_CHAT_ID=your_chat_id_here
@@ -56,13 +56,13 @@ TELEGRAM_USE_WEBHOOK=false
 TELEGRAM_CONFIRMATION_TIMEOUT=60
 TELEGRAM_ALERT_COOLDOWN=5
 TELEGRAM_MAX_PENDING=5
-```
+\`\`\`
 
 ### 4. Install Dependencies
 
-```bash
+\`\`\`bash
 pip install python-telegram-bot==20.7
-```
+\`\`\`
 
 ---
 
@@ -70,7 +70,7 @@ pip install python-telegram-bot==20.7
 
 ### Basic Integration (Polling Mode)
 
-```python
+\`\`\`python
 import asyncio
 from telegram_integration import initialize_telegram_alerts
 
@@ -115,11 +115,11 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-```
+\`\`\`
 
 ### Integration with Institutional Sniper
 
-```python
+\`\`\`python
 from institutional_sniper.detector import InstitutionalDetector
 from telegram_integration import get_alert_manager
 
@@ -150,7 +150,7 @@ class InstitutionalSniperWithTelegram:
         )
         
         return confirmation_id
-```
+\`\`\`
 
 ---
 
@@ -173,11 +173,11 @@ class InstitutionalSniperWithTelegram:
 
 For production deployments with external servers:
 
-```bash
+\`\`\`bash
 TELEGRAM_USE_WEBHOOK=true
 TELEGRAM_WEBHOOK_URL=https://yourdomain.com/telegram/webhook
 TELEGRAM_WEBHOOK_PORT=8443
-```
+\`\`\`
 
 ---
 
@@ -267,7 +267,7 @@ Users can interact with the bot using these commands:
 
 ## 📝 Example .env File
 
-```bash
+\`\`\`bash
 # Telegram Bot Configuration
 TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
 TELEGRAM_CHAT_ID=987654321
@@ -284,7 +284,7 @@ TELEGRAM_USE_WEBHOOK=false
 TELEGRAM_CONFIRMATION_TIMEOUT=60
 TELEGRAM_ALERT_COOLDOWN=5
 TELEGRAM_MAX_PENDING=5
-```
+\`\`\`
 
 ---
 
@@ -292,10 +292,10 @@ TELEGRAM_MAX_PENDING=5
 
 Add to `requirements.txt`:
 
-```
+\`\`\`
 python-telegram-bot==20.7
 python-dotenv>=1.0.0
-```
+\`\`\`
 
 ---
 

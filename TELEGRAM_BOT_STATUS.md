@@ -27,9 +27,9 @@ I've successfully built your **complete Telegram bot interface** following profe
 ## 🚀 QUICK START (3 STEPS)
 
 ### **1. Install Dependencies**
-```bash
+\`\`\`bash
 pip install -r telegram_integration/requirements.txt
-```
+\`\`\`
 
 ### **2. Get Bot Token**
 1. Message `@BotFather` on Telegram
@@ -37,13 +37,13 @@ pip install -r telegram_integration/requirements.txt
 3. Copy your token
 
 ### **3. Run the Bot**
-```bash
+\`\`\`bash
 # Set token
 export TELEGRAM_BOT_TOKEN="your_token_here"
 
 # Start bot
 python bot.py
-```
+\`\`\`
 
 ### **4. Start Using**
 1. Find your bot on Telegram
@@ -140,7 +140,7 @@ All documentation is in:
 
 ### **Module Structure:**
 
-```
+\`\`\`
 telegram_integration/
 ├── bot.py              # Main runner, command registration
 ├── config.py           # Environment config, security
@@ -152,7 +152,7 @@ telegram_integration/
 
 bot.py                  # Root entry point (convenience)
 TELEGRAM_BOT_STATUS.md  # This file
-```
+\`\`\`
 
 ### **Tech Stack:**
 
@@ -175,13 +175,13 @@ TELEGRAM_BOT_STATUS.md  # This file
 ## 🔒 SECURITY FEATURES
 
 ### **User Authentication:**
-```bash
+\`\`\`bash
 # Restrict to specific users
 TELEGRAM_ALLOWED_USERS=123456789,987654321
 
 # Set admin users (for trading control)
 TELEGRAM_ADMIN_USERS=123456789
-```
+\`\`\`
 
 ### **Permission Levels:**
 
@@ -244,7 +244,7 @@ TELEGRAM_ADMIN_USERS=123456789
 
 ### **Example 1: First Time Setup**
 
-```
+\`\`\`
 User: /start
 
 Bot: 👋 Welcome John!
@@ -259,11 +259,11 @@ Bot: 👋 Welcome John!
      /balance - Check portfolio
      /signals - View recent signals
      /performance - View metrics
-```
+\`\`\`
 
 ### **Example 2: Check Status & Control**
 
-```
+\`\`\`
 User: /status
 
 Bot: 🤖 Bot Status
@@ -284,11 +284,11 @@ Bot: ⏹️ Trading Stopped
      
      The bot has stopped trading.
      Use /start_trading to resume.
-```
+\`\`\`
 
 ### **Example 3: View Signals**
 
-```
+\`\`\`
 User: /signals 3
 
 Bot: 🚦 Trading Signal
@@ -306,11 +306,11 @@ Bot: 🚦 Trading Signal
      📊 Showing 1 of 3 signals
      
      [◀️ Previous] [Next ▶️]
-```
+\`\`\`
 
 ### **Example 4: Portfolio Overview**
 
-```
+\`\`\`
 User: /balance
 
 Bot: 💰 Portfolio Balances
@@ -335,7 +335,7 @@ Bot: 💰 Portfolio Balances
      
      ──────────────────────────────
      Total Portfolio Value: $21,300.00
-```
+\`\`\`
 
 ***
 
@@ -382,14 +382,14 @@ Bot: 💰 Portfolio Balances
 
 ### **Minimal Configuration (.env):**
 
-```bash
+\`\`\`bash
 # Required
 TELEGRAM_BOT_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
-```
+\`\`\`
 
 ### **Recommended Configuration:**
 
-```bash
+\`\`\`bash
 # Required
 TELEGRAM_BOT_TOKEN=your_token_here
 
@@ -399,11 +399,11 @@ TELEGRAM_ADMIN_USERS=123456789    # Same for admin
 
 # API
 TRADING_API_URL=http://localhost:8000/api
-```
+\`\`\`
 
 ### **Production Configuration:**
 
-```bash
+\`\`\`bash
 # Required
 TELEGRAM_BOT_TOKEN=your_production_token
 
@@ -425,35 +425,35 @@ ENABLE_ERROR_NOTIFICATIONS=true
 
 # Behavior
 TELEGRAM_RATE_LIMIT=true
-```
+\`\`\`
 
 ***
 
 ## 🚀 DEPLOYMENT OPTIONS
 
 ### **Option 1: Local Development**
-```bash
+\`\`\`bash
 python bot.py
-```
+\`\`\`
 
 ### **Option 2: Production Server**
-```bash
+\`\`\`bash
 # With systemd
 sudo systemctl start telegram-bot
 sudo systemctl enable telegram-bot
-```
+\`\`\`
 
 ### **Option 3: Docker**
-```bash
+\`\`\`bash
 docker build -t trading-bot-telegram .
 docker run -d --env-file .env trading-bot-telegram
-```
+\`\`\`
 
 ### **Option 4: Cloud (Heroku, AWS, etc.)**
-```bash
+\`\`\`bash
 # Set environment variables in cloud dashboard
 # Deploy with git push or CI/CD
-```
+\`\`\`
 
 ***
 

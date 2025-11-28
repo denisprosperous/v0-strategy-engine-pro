@@ -38,7 +38,7 @@ I've just completed all three pending features in the last hour:
 - ✅ Testnet mode for paper trading
 
 **Key Methods:**
-```python
+\`\`\`python
 # Connect to exchange
 await exchange.connect()
 
@@ -59,7 +59,7 @@ sl = await exchange.create_stop_loss_order(
     amount=0.001,
     stop_price=42000
 )
-```
+\`\`\`
 
 ---
 
@@ -81,7 +81,7 @@ sl = await exchange.create_stop_loss_order(
 - ✅ JSON export
 
 **Usage Example:**
-```python
+\`\`\`python
 # Initialize backtest
 backtest = BacktestEngine(initial_capital=10000)
 
@@ -101,7 +101,7 @@ print(backtest.generate_report())
 
 # Export results
 backtest.export_results("results.json")
-```
+\`\`\`
 
 ---
 
@@ -119,9 +119,9 @@ backtest.export_results("results.json")
 - ✅ Detailed JSON reports
 
 **Run Tests:**
-```bash
+\`\`\`bash
 python tests/run_comprehensive_tests.py
-```
+\`\`\`
 
 ---
 
@@ -224,7 +224,7 @@ python tests/run_comprehensive_tests.py
 
 ### **Signal Generation Speed**
 
-```
+\`\`\`
 Technical-Only Mode:
   Average: 15-50ms
   Min: 10ms
@@ -242,11 +242,11 @@ AI-Enhanced Mode (4 providers):
   Min: 200ms
   Max: 700ms
   Throughput: 120+ signals/minute
-```
+\`\`\`
 
 ### **Exchange Integration Performance**
 
-```
+\`\`\`
 Order Execution:
   Market Order: 50-150ms
   Limit Order: 40-120ms
@@ -256,11 +256,11 @@ Data Fetching:
   Balance: 100-200ms
   Ticker: 80-150ms
   OHLCV: 150-300ms
-```
+\`\`\`
 
 ### **Backtesting Performance**
 
-```
+\`\`\`
 100 Trades Analysis:
   Execution: <100ms
   Metrics Calculation: <50ms
@@ -272,7 +272,7 @@ Data Fetching:
   Metrics Calculation: <200ms
   Report Generation: <50ms
   Total: <1 second
-```
+\`\`\`
 
 ---
 
@@ -280,14 +280,14 @@ Data Fetching:
 
 ### **Step 1: Run Example Script**
 
-```bash
+\`\`\`bash
 # Set API keys (optional - works without)
 export OPENAI_API_KEY="sk-..."
 export AI_ENABLED=true
 
 # Run AI-enhanced example
 python examples/ai_enhanced_trading_example.py
-```
+\`\`\`
 
 **Expected Output:**
 - ✅ Bot initialization
@@ -299,10 +299,10 @@ python examples/ai_enhanced_trading_example.py
 
 ### **Step 2: Run Comprehensive Tests**
 
-```bash
+\`\`\`bash
 # Run full test suite
 python tests/run_comprehensive_tests.py
-```
+\`\`\`
 
 **Expected Output:**
 - ✅ AI integration tests
@@ -317,7 +317,7 @@ python tests/run_comprehensive_tests.py
 
 ### **Step 3: Test Exchange Integration**
 
-```bash
+\`\`\`bash
 # Set Binance API keys (testnet recommended)
 export BINANCE_API_KEY="your-key"
 export BINANCE_SECRET_KEY="your-secret"
@@ -340,13 +340,13 @@ async def test():
 
 asyncio.run(test())
 "
-```
+\`\`\`
 
 ---
 
 ### **Step 4: Run Backtesting**
 
-```python
+\`\`\`python
 import asyncio
 from backtesting.backtest_engine import BacktestEngine
 from datetime import datetime, timedelta
@@ -379,7 +379,7 @@ for i in range(100):
 
 # Generate report
 print(backtest.generate_report())
-```
+\`\`\`
 
 **Expected Output:**
 - Win rate: ~70%

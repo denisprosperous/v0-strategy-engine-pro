@@ -67,11 +67,11 @@ Successfully implemented Phase 3 Signal Generation Engine with comprehensive imp
 - Breakeven lock-in at 1R profit
 
 **Calculations**:
-```
+\`\`\`
 Position Size = (Risk Amount / Risk Distance)
 Risk Amount = Account Equity × Risk%
 Reward Distance = Risk Distance × R:R Ratio
-```
+\`\`\`
 
 **Validation**:
 - 4-gate pre-trade risk checks (daily loss, weekly loss, exposure, asset cap)
@@ -176,7 +176,7 @@ Reward Distance = Risk Distance × R:R Ratio
 
 ## Usage Example
 
-```python
+\`\`\`python
 from fibonacci_analyzer_v2 import FibonacciAnalyzer
 from risk_management import RiskManager, SignalTier, AssetClass
 from config_schema import ModularTradingBotConfig
@@ -211,7 +211,7 @@ for symbol, timeframe in scan_universe():
         position_size = risk_manager.calculate_position_size(
             tier, entry_price, sl_price, equity
         )
-```
+\`\`\`
 
 ---
 
