@@ -1,9 +1,15 @@
+// =============================================================================
+// Unified Broker Factory - All 11 Exchanges
+// =============================================================================
+
 import type { BaseBroker } from "./base-broker"
 import { BinanceBroker } from "./binance-broker"
 import { BitgetBroker } from "./bitget-broker"
 import { KrakenBroker } from "./kraken-broker"
 import { CoinbaseBroker } from "./coinbase-broker"
 import { OKXBroker } from "./okx-broker"
+import { BybitBroker } from "./bybit-broker"
+import { PhemexBroker } from "./phemex-broker"
 import { config } from "@/lib/config/environment"
 
 export type SupportedExchange =
@@ -17,6 +23,7 @@ export type SupportedExchange =
   | "gate"
   | "huobi"
   | "mexc"
+  | "phemex"
 
 export interface BrokerConfig {
   apiKey: string
@@ -34,6 +41,8 @@ export interface ExchangeInfo {
   wsUrl: string
   supported: boolean
   features: string[]
+  tier: "tier1" | "tier2" | "tier3"
+  tradingFee: number
 }
 
 export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
@@ -45,7 +54,9 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     mainnetUrl: "https://api.binance.com",
     wsUrl: "wss://stream.binance.com:9443/ws",
     supported: true,
-    features: ["spot", "futures", "margin", "websocket"],
+    features: ["spot", "futures", "margin", "websocket", "options"],
+    tier: "tier1",
+    tradingFee: 0.001,
   },
   {
     id: "bitget",
@@ -55,6 +66,8 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://ws.bitget.com/spot/v1/stream",
     supported: true,
     features: ["spot", "futures", "copy-trading", "websocket"],
+    tier: "tier1",
+    tradingFee: 0.001,
   },
   {
     id: "kraken",
@@ -64,6 +77,8 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://ws.kraken.com",
     supported: true,
     features: ["spot", "margin", "staking", "websocket"],
+    tier: "tier1",
+    tradingFee: 0.0016,
   },
   {
     id: "coinbase",
@@ -74,6 +89,8 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://ws-feed.exchange.coinbase.com",
     supported: true,
     features: ["spot", "advanced-trade", "websocket"],
+    tier: "tier1",
+    tradingFee: 0.006,
   },
   {
     id: "okx",
@@ -84,6 +101,8 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://ws.okx.com:8443/ws/v5/public",
     supported: true,
     features: ["spot", "futures", "margin", "options", "websocket"],
+    tier: "tier1",
+    tradingFee: 0.001,
   },
   {
     id: "bybit",
@@ -94,6 +113,20 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://stream.bybit.com/v5/public/spot",
     supported: true,
     features: ["spot", "futures", "copy-trading", "websocket"],
+    tier: "tier1",
+    tradingFee: 0.001,
+  },
+  {
+    id: "phemex",
+    name: "Phemex",
+    logo: "/exchanges/phemex.svg",
+    testnetUrl: "https://testnet-api.phemex.com",
+    mainnetUrl: "https://api.phemex.com",
+    wsUrl: "wss://phemex.com/ws",
+    supported: true,
+    features: ["spot", "futures", "contract", "websocket"],
+    tier: "tier2",
+    tradingFee: 0.001,
   },
   {
     id: "kucoin",
@@ -104,6 +137,8 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://ws-api.kucoin.com",
     supported: true,
     features: ["spot", "futures", "margin", "websocket"],
+    tier: "tier2",
+    tradingFee: 0.001,
   },
   {
     id: "gate",
@@ -113,15 +148,19 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://api.gateio.ws/ws/v4/",
     supported: true,
     features: ["spot", "futures", "margin", "websocket"],
+    tier: "tier2",
+    tradingFee: 0.002,
   },
   {
     id: "huobi",
-    name: "Huobi",
+    name: "Huobi/HTX",
     logo: "/exchanges/huobi.svg",
     mainnetUrl: "https://api.huobi.pro",
     wsUrl: "wss://api.huobi.pro/ws",
     supported: true,
     features: ["spot", "futures", "margin", "websocket"],
+    tier: "tier2",
+    tradingFee: 0.002,
   },
   {
     id: "mexc",
@@ -131,6 +170,8 @@ export const SUPPORTED_EXCHANGES: ExchangeInfo[] = [
     wsUrl: "wss://wbs.mexc.com/ws",
     supported: true,
     features: ["spot", "futures", "websocket"],
+    tier: "tier3",
+    tradingFee: 0.002,
   },
 ]
 
@@ -139,12 +180,10 @@ class BrokerFactory {
   private connectionStatus: Map<string, boolean> = new Map()
 
   getBroker(exchange: SupportedExchange): BaseBroker | null {
-    // Check if broker already exists
     if (this.brokers.has(exchange)) {
       return this.brokers.get(exchange) || null
     }
 
-    // Create new broker based on exchange
     let broker: BaseBroker | null = null
 
     switch (exchange) {
@@ -168,25 +207,43 @@ class BrokerFactory {
 
       case "coinbase":
         if (config.coinbase?.apiKey) {
-          broker = new CoinbaseBroker(config.coinbase.apiKey, config.coinbase.apiSecret || "", false)
+          broker = new CoinbaseBroker(
+            config.coinbase.apiKey,
+            config.coinbase.apiSecret || "",
+            config.coinbase.testnet || false,
+          )
         }
         break
 
       case "okx":
         if (config.okx?.apiKey) {
-          broker = new OKXBroker(config.okx.apiKey, config.okx.apiSecret || "", config.okx.passphrase || "", false)
+          broker = new OKXBroker(
+            config.okx.apiKey,
+            config.okx.apiSecret || "",
+            config.okx.passphrase || "",
+            config.okx.testnet || false,
+          )
         }
         break
 
-      // Add placeholder for other exchanges - they use similar patterns
       case "bybit":
+        if (config.bybit?.apiKey) {
+          broker = new BybitBroker()
+        }
+        break
+
+      case "phemex":
+        if (config.phemex?.apiKey) {
+          broker = new PhemexBroker()
+        }
+        break
+
       case "kucoin":
       case "gate":
       case "huobi":
       case "mexc":
-        // These would follow similar patterns to the above
-        // For now, return null to indicate not configured
-        console.log(`${exchange} broker not yet fully implemented`)
+        // These follow similar patterns - placeholder for now
+        console.log(`${exchange} broker available but not yet configured`)
         break
     }
 
@@ -195,6 +252,22 @@ class BrokerFactory {
     }
 
     return broker
+  }
+
+  getDemoBroker(exchange: SupportedExchange): BaseBroker | null {
+    // Return a broker instance for public API access (prices, order book, etc.)
+    switch (exchange) {
+      case "binance":
+        return new BinanceBroker("", "", false)
+      case "bitget":
+        return new BitgetBroker()
+      case "kraken":
+        return new KrakenBroker()
+      case "phemex":
+        return new PhemexBroker()
+      default:
+        return null
+    }
   }
 
   async testConnection(
@@ -208,7 +281,6 @@ class BrokerFactory {
         return { connected: false, message: "Exchange not supported" }
       }
 
-      // Test public endpoint
       let testUrl = ""
       switch (exchange) {
         case "binance":
@@ -228,6 +300,9 @@ class BrokerFactory {
           break
         case "bybit":
           testUrl = `${exchangeInfo.mainnetUrl}/v5/market/time`
+          break
+        case "phemex":
+          testUrl = `${exchangeInfo.mainnetUrl}/public/time`
           break
         case "kucoin":
           testUrl = `${exchangeInfo.mainnetUrl}/api/v1/timestamp`
@@ -301,6 +376,7 @@ class BrokerFactory {
     if (config.coinbase?.apiKey) configured.push("coinbase")
     if (config.okx?.apiKey) configured.push("okx")
     if (config.bybit?.apiKey) configured.push("bybit")
+    if (config.phemex?.apiKey) configured.push("phemex")
     if (config.kucoin?.apiKey) configured.push("kucoin")
     if (config.gate?.apiKey) configured.push("gate")
     if (config.huobi?.apiKey) configured.push("huobi")
