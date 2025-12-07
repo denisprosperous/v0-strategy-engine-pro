@@ -195,4 +195,4 @@ The Neural Trading Bot is a comprehensive algorithmic trading platform supportin
 *This report was auto-generated based on codebase analysis.*
 \`\`\`
 
-```typescript file="" isHidden
+\`\`\`typescript file="" isHidden
