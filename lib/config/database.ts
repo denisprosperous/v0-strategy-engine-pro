@@ -1,26 +1,40 @@
 import { Redis } from "@upstash/redis"
+import crypto from "crypto"
 
-// Initialize Redis client using environment variables
-const redis = new Redis({
-  url: process.env.UPSTASH_KV_KV_REST_API_URL || process.env.KV_REST_API_URL || "",
-  token: process.env.UPSTASH_KV_KV_REST_API_TOKEN || process.env.KV_REST_API_TOKEN || "",
-})
+const redisUrl =
+  process.env.UPSTASH_KV_KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL || ""
+const redisToken =
+  process.env.UPSTASH_KV_KV_REST_API_TOKEN ||
+  process.env.UPSTASH_REDIS_REST_TOKEN ||
+  process.env.KV_REST_API_TOKEN ||
+  ""
+
+// Create Redis client only if credentials are available
+const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null
+
+// Log Redis connection status (only in development)
+if (process.env.NODE_ENV === "development") {
+  console.log("[v0] Redis configured:", !!redis)
+}
 
 // Data access layer that uses Redis for persistence
 export const db = {
   // Users
   async getUser(userId: string) {
+    if (!redis) return null
     const user = await redis.hgetall(`user:${userId}`)
     return user && Object.keys(user).length > 0 ? user : null
   },
 
   async getUserByUsername(username: string) {
+    if (!redis) return null
     const userId = await redis.get(`username:${username}`)
     if (!userId) return null
     return this.getUser(userId as string)
   },
 
   async getUserByEmail(email: string) {
+    if (!redis) return null
     const userId = await redis.get(`email:${email}`)
     if (!userId) return null
     return this.getUser(userId as string)
@@ -33,6 +47,7 @@ export const db = {
     passwordHash: string
     role?: string
   }) {
+    if (!redis) throw new Error("Database not configured")
     const userData = {
       ...user,
       role: user.role || "trader",
@@ -53,218 +68,173 @@ export const db = {
   },
 
   async updateUser(userId: string, updates: Record<string, unknown>) {
-    const newUpdates = { ...updates, updatedAt: new Date().toISOString() }
-    await redis.hset(`user:${userId}`, newUpdates)
+    if (!redis) throw new Error("Database not configured")
+    const updateData = {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    }
+    await redis.hset(`user:${userId}`, updateData)
     return this.getUser(userId)
   },
 
   // Trades
-  async getTrades(userId: string, options?: { status?: string; limit?: number }) {
-    const tradeIds = await redis.smembers(`user:${userId}:trades`)
-    if (!tradeIds.length) return []
-
-    const trades = await Promise.all(
-      tradeIds.map(async (id) => {
-        const trade = await redis.hgetall(`trade:${id}`)
-        return trade && Object.keys(trade).length > 0 ? { id, ...trade } : null
-      }),
-    )
-
-    let filteredTrades = trades.filter(Boolean) as Record<string, unknown>[]
-
-    if (options?.status) {
-      filteredTrades = filteredTrades.filter((t) => t.status === options.status)
-    }
-
-    filteredTrades.sort(
-      (a, b) =>
-        new Date((b.executionTime as string) || 0).getTime() - new Date((a.executionTime as string) || 0).getTime(),
-    )
-
-    if (options?.limit) {
-      filteredTrades = filteredTrades.slice(0, options.limit)
-    }
-
-    return filteredTrades
-  },
-
   async createTrade(trade: {
     id: string
     userId: string
     symbol: string
     side: string
-    entryPrice: number
     quantity: number
-    broker: string
+    price: number
+    exchange: string
     strategyId?: string
-    stopLoss?: number
-    takeProfit?: number
+    status?: string
   }) {
+    if (!redis) throw new Error("Database not configured")
     const tradeData = {
       ...trade,
-      status: "open",
-      pnl: 0,
-      fees: 0,
-      executionTime: new Date().toISOString(),
+      status: trade.status || "open",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     }
     await redis.hset(`trade:${trade.id}`, tradeData)
-    await redis.sadd(`user:${trade.userId}:trades`, trade.id)
-    await redis.sadd("trades", trade.id)
+    await redis.lpush(`user:${trade.userId}:trades`, trade.id)
+    await redis.lpush("trades:all", trade.id)
     return tradeData
   },
 
-  async updateTrade(tradeId: string, updates: Record<string, unknown>) {
-    await redis.hset(`trade:${tradeId}`, updates)
-    return redis.hgetall(`trade:${tradeId}`)
+  async getTrade(tradeId: string) {
+    if (!redis) return null
+    const trade = await redis.hgetall(`trade:${tradeId}`)
+    return trade && Object.keys(trade).length > 0 ? trade : null
   },
 
-  async closeTrade(tradeId: string, exitPrice: number, fees = 0) {
-    const trade = (await redis.hgetall(`trade:${tradeId}`)) as Record<string, unknown>
-    if (!trade) return null
+  async getUserTrades(userId: string, limit = 50) {
+    if (!redis) return []
+    const tradeIds = await redis.lrange(`user:${userId}:trades`, 0, limit - 1)
+    const trades = await Promise.all(tradeIds.map((id) => this.getTrade(id as string)))
+    return trades.filter(Boolean)
+  },
 
-    const entryPrice = Number.parseFloat(trade.entryPrice as string)
-    const quantity = Number.parseFloat(trade.quantity as string)
-    const pnl =
-      trade.side === "buy" ? (exitPrice - entryPrice) * quantity - fees : (entryPrice - exitPrice) * quantity - fees
-
-    const updates = {
-      status: "closed",
-      exitPrice,
-      pnl,
-      fees,
-      closeTime: new Date().toISOString(),
+  async updateTrade(tradeId: string, updates: Record<string, unknown>) {
+    if (!redis) throw new Error("Database not configured")
+    const updateData = {
+      ...updates,
+      updatedAt: new Date().toISOString(),
     }
-    await redis.hset(`trade:${tradeId}`, updates)
-    return { ...trade, ...updates }
+    await redis.hset(`trade:${tradeId}`, updateData)
+    return this.getTrade(tradeId)
   },
 
   // Strategies
-  async getStrategies(userId: string) {
-    const strategyIds = await redis.smembers(`user:${userId}:strategies`)
-    if (!strategyIds.length) return []
-
-    const strategies = await Promise.all(
-      strategyIds.map(async (id) => {
-        const strategy = await redis.hgetall(`strategy:${id}`)
-        return strategy && Object.keys(strategy).length > 0 ? { id, ...strategy } : null
-      }),
-    )
-
-    return strategies.filter(Boolean)
-  },
-
   async createStrategy(strategy: {
     id: string
     userId: string
     name: string
     type: string
-    description?: string
-    parameters?: Record<string, unknown>
+    config: Record<string, unknown>
   }) {
+    if (!redis) throw new Error("Database not configured")
     const strategyData = {
       ...strategy,
-      parameters: JSON.stringify(strategy.parameters || {}),
-      isActive: false,
-      performanceMetrics: JSON.stringify({
-        totalTrades: 0,
-        winRate: 0,
-        avgPnl: 0,
-        maxDrawdown: 0,
-        sharpeRatio: 0,
-      }),
+      config: JSON.stringify(strategy.config),
+      enabled: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
     await redis.hset(`strategy:${strategy.id}`, strategyData)
-    await redis.sadd(`user:${strategy.userId}:strategies`, strategy.id)
-    await redis.sadd("strategies", strategy.id)
+    await redis.lpush(`user:${strategy.userId}:strategies`, strategy.id)
     return strategyData
   },
 
+  async getStrategy(strategyId: string) {
+    if (!redis) return null
+    const strategy = await redis.hgetall(`strategy:${strategyId}`)
+    if (!strategy || Object.keys(strategy).length === 0) return null
+    return {
+      ...strategy,
+      config: typeof strategy.config === "string" ? JSON.parse(strategy.config) : strategy.config,
+    }
+  },
+
+  async getUserStrategies(userId: string) {
+    if (!redis) return []
+    const strategyIds = await redis.lrange(`user:${userId}:strategies`, 0, -1)
+    const strategies = await Promise.all(strategyIds.map((id) => this.getStrategy(id as string)))
+    return strategies.filter(Boolean)
+  },
+
   async updateStrategy(strategyId: string, updates: Record<string, unknown>) {
-    const newUpdates: Record<string, unknown> = { ...updates, updatedAt: new Date().toISOString() }
-    if (newUpdates.parameters && typeof newUpdates.parameters === "object") {
-      newUpdates.parameters = JSON.stringify(newUpdates.parameters)
-    }
-    if (newUpdates.performanceMetrics && typeof newUpdates.performanceMetrics === "object") {
-      newUpdates.performanceMetrics = JSON.stringify(newUpdates.performanceMetrics)
-    }
-    await redis.hset(`strategy:${strategyId}`, newUpdates)
-    return redis.hgetall(`strategy:${strategyId}`)
-  },
-
-  // Market Data Cache
-  async cacheMarketData(symbol: string, data: unknown, ttlSeconds = 60) {
-    await redis.setex(`market:${symbol}`, ttlSeconds, JSON.stringify(data))
-  },
-
-  async getCachedMarketData(symbol: string) {
-    const data = await redis.get(`market:${symbol}`)
-    return data ? JSON.parse(data as string) : null
-  },
-
-  // Portfolio
-  async getPortfolio(userId: string) {
-    const portfolio = await redis.hgetall(`portfolio:${userId}`)
-    return portfolio && Object.keys(portfolio).length > 0 ? portfolio : null
-  },
-
-  async updatePortfolio(userId: string, updates: Record<string, unknown>) {
-    await redis.hset(`portfolio:${userId}`, {
+    if (!redis) throw new Error("Database not configured")
+    const updateData = {
       ...updates,
+      config: updates.config ? JSON.stringify(updates.config) : undefined,
       updatedAt: new Date().toISOString(),
-    })
-    return this.getPortfolio(userId)
+    }
+    // Remove undefined values
+    Object.keys(updateData).forEach((key) => updateData[key] === undefined && delete updateData[key])
+    await redis.hset(`strategy:${strategyId}`, updateData)
+    return this.getStrategy(strategyId)
   },
 
   // Analytics
-  async getAnalytics(userId: string) {
-    const trades = await this.getTrades(userId)
-    const strategies = await this.getStrategies(userId)
-
-    const closedTrades = trades.filter((t) => t.status === "closed")
-    const openTrades = trades.filter((t) => t.status === "open")
-
-    const totalPnL = closedTrades.reduce((sum, t) => sum + Number.parseFloat((t.pnl as string) || "0"), 0)
-    const winningTrades = closedTrades.filter((t) => Number.parseFloat((t.pnl as string) || "0") > 0)
-    const winRate = closedTrades.length > 0 ? (winningTrades.length / closedTrades.length) * 100 : 0
-
-    const activeStrategies = strategies.filter(
-      (s) => (s as Record<string, unknown>).isActive === "true" || (s as Record<string, unknown>).isActive === true,
-    )
-
-    return {
-      portfolio: {
-        totalPnL,
-        dailyPnL: 0,
-        pnlPercentage: 0,
-      },
-      trading: {
-        totalTrades: trades.length,
-        openTrades: openTrades.length,
-        winRate,
-        activeStrategies: activeStrategies.length,
-      },
-      performance: {
-        bestTrade:
-          closedTrades.length > 0
-            ? Math.max(...closedTrades.map((t) => Number.parseFloat((t.pnl as string) || "0")))
-            : 0,
-        worstTrade:
-          closedTrades.length > 0
-            ? Math.min(...closedTrades.map((t) => Number.parseFloat((t.pnl as string) || "0")))
-            : 0,
-        avgTradeSize:
-          closedTrades.length > 0
-            ? closedTrades.reduce(
-                (sum, t) =>
-                  sum +
-                  Number.parseFloat((t.entryPrice as string) || "0") * Number.parseFloat((t.quantity as string) || "0"),
-                0,
-              ) / closedTrades.length
-            : 0,
-      },
+  async recordAnalytics(userId: string, data: Record<string, unknown>) {
+    if (!redis) return null
+    const analyticsData = {
+      ...data,
+      userId,
+      timestamp: new Date().toISOString(),
     }
+    const key = `analytics:${userId}:${Date.now()}`
+    await redis.hset(key, analyticsData)
+    await redis.lpush(`user:${userId}:analytics`, key)
+    await redis.expire(key, 60 * 60 * 24 * 30) // 30 days TTL
+    return analyticsData
+  },
+
+  async getAnalytics(userId: string, limit = 100) {
+    if (!redis) return []
+    const keys = await redis.lrange(`user:${userId}:analytics`, 0, limit - 1)
+    const analytics = await Promise.all(keys.map((key) => redis.hgetall(key as string)))
+    return analytics.filter((a) => a && Object.keys(a).length > 0)
+  },
+
+  // Signals (from analysis jobs)
+  async getLatestSignals() {
+    if (!redis) return {}
+    return (await redis.hgetall("signals:latest")) || {}
+  },
+
+  async getSignalsForSymbol(symbol: string, limit = 20) {
+    if (!redis) return []
+    const signals = await redis.zrange(`signals:${symbol}`, -limit, -1)
+    return signals.map((s) => (typeof s === "string" ? JSON.parse(s) : s))
+  },
+
+  // Market data
+  async getMarketPrices() {
+    if (!redis) return {}
+    return (await redis.hgetall("market:prices")) || {}
+  },
+
+  async getLastAnalysisRun() {
+    if (!redis) return null
+    return await redis.get("analysis:lastRun")
+  },
+
+  // Health check
+  async healthCheck() {
+    if (!redis) return { status: "disconnected", error: "Redis not configured" }
+    try {
+      await redis.ping()
+      return { status: "connected" }
+    } catch (error) {
+      return { status: "error", error: (error as Error).message }
+    }
+  },
+
+  // Check if Redis is available
+  isConnected() {
+    return !!redis
   },
 }
 
