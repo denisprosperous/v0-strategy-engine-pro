@@ -6,12 +6,6 @@
   "installCommand": "npm install",
   "cleanUrls": true,
   "trailingSlash": false,
-  "functions": {
-    "app/api/**/*.ts": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 30
-    }
-  },
   "env": {
     "VERCEL_REGION": "iad1",
     "PYTHON_API_URL": "",
