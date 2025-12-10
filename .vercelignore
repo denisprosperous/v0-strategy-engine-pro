@@ -1,16 +1,63 @@
-# Ignore Python directories and files not needed for Vercel deployment
+# Python API (to be deployed separately if needed)
+api/
 exchanges/
+app/exchanges/
+risk_management/
+backtesting/
+monitoring/
+strategies/
+ai_models/
+analytics/
+
+# Python files
+*.py
 *.pyc
+*.pyo
+*.pyd
 __pycache__/
 .pytest_cache/
-.env.local
-.env.*.local
+*.egg-info/
+.eggs/
+dist/
+build/
+*.whl
+
+# Python dependencies file (prevents pip install)
+requirements.txt
+
+# Virtual environments
 .venv/
 venv/
-*.egg-info/
+env/
+.env/
+
+# Development files
+.env.local
+.env.*.local
 .DS_Store
+*.log
+
+# Node/Build
 node_modules/
 .next/
 out/
-build/
 .turbo/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test files
+*.test.py
+*_test.py
+tests/
+test/
+
+# Documentation build
+docs/_build/
+
+# Cache
+.cache/
+*.cache
