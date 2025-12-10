@@ -12,8 +12,10 @@ export const config = {
     name: "v0 Strategy Engine Pro",
     version: "2.0.0",
     env: process.env.NODE_ENV || "development",
-    debug: process.env.DEBUG === "true",
+    debug: process.env.DEBUG === "true" || process.env.NODE_ENV === "development",
     baseUrl: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    region: process.env.VERCEL_REGION || "iad1",
+    pythonApiUrl: process.env.PYTHON_API_URL || "",
   },
 
   // =========================================================================
@@ -182,10 +184,9 @@ export const config = {
   // AI/LLM Provider Configuration
   // =========================================================================
   ai: {
-    // Primary AI Provider Selection
-    primaryModel: process.env.AI_PRIMARY_MODEL || "openai",
-    fallbackModel: process.env.AI_FALLBACK_MODEL || "groq",
-    sentimentModel: process.env.AI_SENTIMENT_MODEL || "perplexity",
+    primaryModel: process.env.AI_PRIMARY_MODEL || "openai", // Best for complex analysis
+    fallbackModel: process.env.AI_FALLBACK_MODEL || "groq", // Fast fallback
+    sentimentModel: process.env.AI_SENTIMENT_MODEL || "perplexity", // Real-time sentiment
 
     // OpenAI (GPT-4, GPT-4o)
     openai: {
@@ -280,73 +281,73 @@ export const config = {
   // =========================================================================
   risk: {
     // Position Sizing
-    maxPositionSize: Number.parseFloat(process.env.MAX_POSITION_SIZE || "10000"),
+    maxPositionSize: Number.parseFloat(process.env.MAX_POSITION_SIZE || "2000"), // $2000 max per position
     maxPositionPercent: 0.02, // 2% of portfolio per trade (industry standard)
 
     // Loss Limits
-    maxDailyLoss: Number.parseFloat(process.env.MAX_DAILY_LOSS || "1000"),
+    maxDailyLoss: Number.parseFloat(process.env.MAX_DAILY_LOSS || "500"), // $500 max daily loss (conservative)
     maxDailyLossPercent: 0.05, // 5% max daily loss
-    maxDrawdown: Number.parseFloat(process.env.MAX_DRAWDOWN || "0.15"), // 15% max drawdown
+    maxDrawdown: Number.parseFloat(process.env.MAX_DRAWDOWN || "0.10"), // 10% max drawdown
 
     // Trade Limits
-    maxOpenTrades: Number.parseInt(process.env.MAX_OPEN_TRADES || "10"),
+    maxOpenTrades: Number.parseInt(process.env.MAX_OPEN_TRADES || "5"), // Max 5 concurrent trades
     maxConcurrentTrades: Number.parseInt(process.env.MAX_CONCURRENT_TRADES || "5"),
-    cooldownPeriod: Number.parseInt(process.env.TRADE_COOLDOWN_MS || "30000"),
+    cooldownPeriod: Number.parseInt(process.env.TRADE_COOLDOWN_MS || "60000"), // 1 minute between trades
 
     // Stop Loss / Take Profit
-    defaultStopLoss: Number.parseFloat(process.env.DEFAULT_STOP_LOSS || "0.02"), // 2%
-    defaultTakeProfit: Number.parseFloat(process.env.DEFAULT_TAKE_PROFIT || "0.06"), // 6%
+    defaultStopLoss: Number.parseFloat(process.env.DEFAULT_STOP_LOSS || "0.02"), // 2% stop loss
+    defaultTakeProfit: Number.parseFloat(process.env.DEFAULT_TAKE_PROFIT || "0.06"), // 6% take profit (1:3 ratio)
     trailingStopEnabled: true,
     trailingStopPercent: 0.015, // 1.5%
 
     // Kelly Criterion
-    kellyFraction: Number.parseFloat(process.env.KELLY_FRACTION || "0.25"), // Quarter Kelly
+    kellyFraction: Number.parseFloat(process.env.KELLY_FRACTION || "0.25"), // Quarter Kelly (conservative)
 
     // Phi (Golden Ratio) Risk
-    phiRiskPerTrade: Number.parseFloat(process.env.PHI_RISK_PER_TRADE || "0.01618"), // 1.618%
-    phiMaxDrawdown: Number.parseFloat(process.env.PHI_MAX_DRAWDOWN || "0.0618"), // 6.18%
-    phiAtrMultiplier: Number.parseFloat(process.env.PHI_ATR_MULTIPLIER || "1.618"),
+    phiRiskPerTrade: Number.parseFloat(process.env.PHI_RISK_PER_TRADE || "0.01618"), // 1.618% (golden ratio)
+    phiMaxDrawdown: Number.parseFloat(process.env.PHI_MAX_DRAWDOWN || "0.0618"), // 6.18% (golden ratio)
+    phiAtrMultiplier: Number.parseFloat(process.env.PHI_ATR_MULTIPLIER || "1.618"), // ATR multiplier
+
+    // Pattern Day Trading Protection
+    pdtMaxDayTrades: Number.parseInt(process.env.PDT_MAX_DAY_TRADES || "3"), // Max 3 day trades in 5 days
+    pdtMinAccountValue: Number.parseInt(process.env.PDT_MIN_ACCOUNT_VALUE || "25000"), // $25k PDT threshold
+    pdtDayTradeWindow: Number.parseInt(process.env.PDT_DAY_TRADE_WINDOW || "5"), // 5 day rolling window
 
     // Volatility Controls
-    maxVolatility: Number.parseFloat(process.env.MAX_VOLATILITY || "0.05"), // 5%
-    volatilityWindow: Number.parseInt(process.env.VOLATILITY_WINDOW || "24"), // hours
-    volatilityPauseDuration: Number.parseInt(process.env.VOLATILITY_PAUSE_DURATION || "3600000"), // 1 hour
-
-    // Risk-Free Rate for Sharpe Ratio
-    riskFreeRate: Number.parseFloat(process.env.RISK_FREE_RATE || "0.05"), // 5% annual
+    maxVolatility: Number.parseFloat(process.env.MAX_VOLATILITY || "0.05"), // Pause if >5% daily volatility
+    volatilityWindow: Number.parseInt(process.env.VOLATILITY_WINDOW || "24"), // 24 hour window
+    volatilityPauseDuration: Number.parseInt(process.env.VOLATILITY_PAUSE_DURATION || "3600000"), // 1 hour pause
   },
 
   // =========================================================================
-  // Trading Configuration
+  // Trading Configuration - Professional Defaults
   // =========================================================================
   trading: {
-    // Trading Mode
-    mode: process.env.TRADING_MODE || "demo", // demo, paper, live
+    mode: (process.env.TRADING_MODE as "demo" | "paper" | "live") || "demo",
 
-    // Demo/Paper Trading
+    // Demo/Paper Trading - Start with realistic balance
     demoEnabled: process.env.ENABLE_DEMO_MODE !== "false",
-    demoInitialBalance: Number.parseFloat(process.env.DEMO_INITIAL_BALANCE || "10000"),
+    demoInitialBalance: Number.parseFloat(process.env.DEMO_INITIAL_BALANCE || "10000"), // $10k demo balance
 
-    // Backtesting
-    backtestEnabled: process.env.ENABLE_BACKTESTING === "true",
+    // Backtesting - Full year by default
+    backtestEnabled: process.env.ENABLE_BACKTESTING !== "false", // Enabled by default
     backtestStartDate: process.env.BACKTEST_START_DATE || "2024-01-01",
     backtestEndDate: process.env.BACKTEST_END_DATE || "2024-12-31",
 
-    // Default Trade Settings
-    defaultTradeSize: Number.parseFloat(process.env.DEFAULT_TRADE_SIZE || "100"),
-    defaultLeverage: 1, // No leverage by default (safety)
+    defaultTradeSize: Number.parseFloat(process.env.DEFAULT_TRADE_SIZE || "200"), // $200 per trade
+    defaultLeverage: 1, // No leverage by default (safety first)
 
     // Slippage
-    maxSlippage: 0.005, // 0.5% max slippage
+    maxSlippage: 0.003, // 0.3% max slippage (tighter for professional trading)
 
     // Order Types
-    preferredOrderType: "limit", // limit, market
+    preferredOrderType: "limit", // Limit orders for better fills
     limitOrderTimeout: 30000, // 30 seconds
 
-    // Target Performance
-    targetTradesPerYear: Number.parseInt(process.env.TARGET_TRADES_PER_YEAR || "500"),
-    targetWinRate: 0.55, // 55% target win rate
-    targetRiskReward: 2.0, // 1:2 risk/reward ratio
+    // Target Performance (realistic professional targets)
+    targetTradesPerYear: Number.parseInt(process.env.TARGET_TRADES_PER_YEAR || "250"), // ~1 trade/day
+    targetWinRate: 0.55, // 55% win rate target
+    targetRiskReward: 3.0, // 1:3 risk/reward ratio
   },
 
   // =========================================================================
@@ -412,24 +413,38 @@ export const config = {
   },
 
   // =========================================================================
-  // Logging & Monitoring
+  // Logging & Monitoring - Professional Standards
   // =========================================================================
   logging: {
-    level: process.env.LOG_LEVEL || "info",
-    structured: process.env.ENABLE_STRUCTURED_LOGS === "true",
-    file: process.env.LOG_FILE || "./logs/trading_engine.log",
-    maxSize: "10m",
-    maxFiles: 10,
+    level: (process.env.LOG_LEVEL as "debug" | "info" | "warn" | "error") || "info",
+    structuredLogs: process.env.ENABLE_STRUCTURED_LOGS !== "false", // JSON logs by default
+    logFile: process.env.LOG_FILE || "logs/trading.log",
+    enableProfiling: process.env.ENABLE_PROFILING === "true", // Performance profiling
+
+    // Log retention
+    maxLogSize: "10m", // 10MB per file
+    maxLogFiles: 5, // Keep 5 rotated files
+
+    // Metrics collection
+    metricsInterval: 60000, // Collect metrics every minute
+    enableTraceId: true, // Trace request IDs
   },
 
   // =========================================================================
-  // Performance Optimization
+  // Database & Performance - Professional Settings
   // =========================================================================
   performance: {
-    enableProfiling: process.env.ENABLE_PROFILING === "true",
-    dbPoolSize: Number.parseInt(process.env.DB_POOL_SIZE || "10"),
-    dbMaxOverflow: Number.parseInt(process.env.DB_MAX_OVERFLOW || "20"),
-    dataRefreshInterval: Number.parseInt(process.env.DATA_REFRESH_INTERVAL || "60"),
+    dbPoolSize: Number.parseInt(process.env.DB_POOL_SIZE || "10"), // 10 connections
+    dbMaxOverflow: Number.parseInt(process.env.DB_MAX_OVERFLOW || "20"), // 20 overflow connections
+
+    // Data refresh intervals
+    dataRefreshInterval: Number.parseInt(process.env.DATA_REFRESH_INTERVAL || "5"), // 5 seconds
+    priceUpdateInterval: 1000, // 1 second for price updates
+    portfolioRefreshInterval: 30000, // 30 seconds for portfolio
+
+    // Caching
+    cacheTtl: 60, // 60 second cache TTL
+    maxCacheSize: 1000, // Max 1000 cached items
   },
 }
 
