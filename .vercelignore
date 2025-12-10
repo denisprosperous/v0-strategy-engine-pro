@@ -1,5 +1,10 @@
-# Python API (to be deployed separately if needed)
+# ==============================================
+# EXCLUDE ALL PYTHON - USING NEXT.JS API ROUTES
+# ==============================================
+
+# Python directories
 api/
+python_api/
 exchanges/
 app/exchanges/
 risk_management/
@@ -8,13 +13,18 @@ monitoring/
 strategies/
 ai_models/
 analytics/
+signal_generation/
+telegram_integration/
+config/
 
-# Python files
+# ALL Python files (prevents Python runtime detection)
 *.py
 *.pyc
 *.pyo
 *.pyd
-__pycache__/
+**/*.py
+**/*.pyc
+**/__pycache__/
 .pytest_cache/
 *.egg-info/
 .eggs/
@@ -22,26 +32,36 @@ dist/
 build/
 *.whl
 
-# Python dependencies file (prevents pip install)
+# Python dependencies (CRITICAL - prevents pip install)
 requirements.txt
+requirements-dev.txt
+requirements-test.txt
+setup.py
+setup.cfg
+pyproject.toml
+poetry.lock
+Pipfile
+Pipfile.lock
 
 # Virtual environments
 .venv/
 venv/
 env/
 .env/
+virtualenv/
 
-# Development files
+# Root Python files that trigger detection
+bot.py
+main.py
+trading_mode_manager.py
+settings.py
+
+# Development/Local files
 .env.local
 .env.*.local
 .DS_Store
 *.log
-
-# Node/Build
-node_modules/
-.next/
-out/
-.turbo/
+*.tmp
 
 # IDE
 .idea/
@@ -54,10 +74,25 @@ out/
 *_test.py
 tests/
 test/
+pytest.ini
+.coverage
+htmlcov/
 
-# Documentation build
-docs/_build/
+# Documentation
+docs/
+*.md
+!README.md
 
 # Cache
 .cache/
 *.cache
+.mypy_cache/
+.ruff_cache/
+
+# Large/unnecessary files
+*.pkl
+*.pickle
+*.h5
+*.model
+data/
+logs/
